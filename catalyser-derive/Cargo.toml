@@ -1,10 +1,17 @@
 [package]
 name = "catalyser-derive"
 version = "0.1.0"
+keywords = [
+    "utils",
+    "derive"
+]
 authors.workspace = true
 edition.workspace = true
+categories.workspace = true
+homepage.workspace = true
 license-file.workspace = true
 readme.workspace = true
+repository.workspace = true
 
 [dependencies]
 

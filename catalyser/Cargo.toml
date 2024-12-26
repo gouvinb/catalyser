@@ -1,10 +1,19 @@
 [package]
 name = "catalyser"
 version = "0.1.0"
+keywords = [
+    "utils",
+    "std",
+    "serde",
+]
 authors.workspace = true
 edition.workspace = true
+categories.workspace = true
+homepage.workspace = true
 license-file.workspace = true
 readme.workspace = true
+repository.workspace = true
+
 
 [dependencies]
 serde = { version = "1.0.216", features = ["derive"], optional = true }

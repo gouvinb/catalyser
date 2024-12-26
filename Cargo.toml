@@ -11,5 +11,8 @@ catalyser = { path = "catalyser" }
 [workspace.package]
 authors = ["gouvinb"]
 edition = "2021"
+categories = ["rust-patterns"]
+homepage = ""
 license-file = "<workspace_dir>/LICENSE.md"
 readme = "<workspace_dir>/README.md"
+repository = "https://github.com/gouvinb/catalyser"
