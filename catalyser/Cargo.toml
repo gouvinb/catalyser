@@ -1,0 +1,30 @@
+[package]
+name = "catalyser"
+version = "0.1.0"
+authors.workspace = true
+edition.workspace = true
+license-file.workspace = true
+readme.workspace = true
+
+[dependencies]
+serde = { version = "1.0.216", features = ["derive"], optional = true }
+
+[dev-dependencies]
+serde_json = { version = "1.0.134" }
+
+[features]
+default = []
+
+# Provide `catalyser` unstable functionality.
+unstable = []
+
+# Provide derive macros.
+derive = []
+
+# Provide `catalyser` for common standard library.
+# Requires a dependency on the Rust standard library.
+std = []
+
+# Provide `catalyser` for serde library.
+# Requires a serde dependency.
+serde = ["dep:serde"]

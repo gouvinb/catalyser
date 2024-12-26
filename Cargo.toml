@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+members = [
+    "catalyser",
+    "catalyser-derive"
+]
+
+[patch.crates-io]
+catalyser = { path = "catalyser" }
+
+[workspace.package]
+authors = ["gouvinb"]
+edition = "2021"
+license-file = "<workspace_dir>/LICENSE.md"
+readme = "<workspace_dir>/README.md"
