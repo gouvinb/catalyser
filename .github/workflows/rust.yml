@@ -67,7 +67,7 @@ jobs:
           fi
 
       - name: Cargo publish catalyser
-        run: cargo publish ${{ env.run_mode }} -p cataliser
+        run: cargo publish ${{ env.run_mode }} -p catalyser
 
       #- name: Cargo publish catalyser-derive
-      #  run: cargo publish ${{ env.run_mode }} -p cataliser-derive
+      #  run: cargo publish ${{ env.run_mode }} -p catalyser-derive
