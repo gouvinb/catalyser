@@ -64,6 +64,7 @@ jobs:
             echo "run_mode=--dry-run" >> $GITHUB_ENV
           else
             echo "run_mode=" >> $GITHUB_ENV
+          fi
 
       - name: Cargo publish catalyser
         run: cargo publish ${{ env.run_mode }} -p cataliser
