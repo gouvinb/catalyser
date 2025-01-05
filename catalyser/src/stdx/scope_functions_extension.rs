@@ -6,9 +6,9 @@
 //!
 //! ## Traits:
 //!
-//! - **Also**: A trait that allows temporary mutation or inspection of a value using a closure,
+//! - **Apply**: A trait that allows temporary mutation or inspection of a value using a closure,
 //!   returning the original value.
-//! - **Let**: A trait to transform a value into another value using a closure.
+//! - **Run**: A trait to transform a value into another value using a closure.
 //! - **TakeIf**: A trait to conditionally return an `Option<Self>` if a predicate is satisfied.
 //! - **TakeUnless**: A trait to conditionally return an `Option<Self>` unless a predicate is
 //!   satisfied.
@@ -20,26 +20,26 @@
 //!
 //! ## Examples:
 //!
-//! ### `Also` Trait
+//! ### `Apply` Trait
 //!
 //! ```rust
-//! use catalyser::stdx::scope_functions_extension::Also;
+//! use catalyser::stdx::scope_functions_extension::Apply;
 //!
 //! let value = 0;
 //! let result = value
-//!     .also(|v| { *v += 1; });
+//!     .apply(|v| { *v += 1; });
 //! assert_eq!(result, 1);
 //! ```
 //!
-//! ### `Let` Trait
+//! ### `Run` Trait
 //!
 //! ```rust
-//! use catalyser::stdx::scope_functions_extension::Let;
+//! use catalyser::stdx::scope_functions_extension::Run;
 //!
 //! let value = vec![0];
 //! let transformed = value
-//!     .let_do(|v| v.first().unwrap() + 1)
-//!     .let_do(|v| v.to_string());
+//!     .run(|v| v.first().unwrap() + 1)
+//!     .run(|v| v.to_string());
 //! assert_eq!(transformed, "1");
 //! ```
 //!
@@ -76,8 +76,8 @@
 //! ```
 
 /// Calls the specified function `block` with `self` value as its argument and returns `self` value.
-pub trait Also: Sized {
-    fn also<F>(mut self, block: F) -> Self
+pub trait Apply: Sized {
+    fn apply<F>(mut self, block: F) -> Self
     where
         F: FnOnce(&mut Self),
     {
@@ -86,18 +86,18 @@ pub trait Also: Sized {
     }
 }
 
-impl<T> Also for T {}
+impl<T> Apply for T {}
 
 /// Calls the specified function `block` with `self` value as its argument and returns its result.
-pub trait Let {
-    fn let_do<R, F>(self, block: F) -> R
+pub trait Run {
+    fn run<R, F>(self, block: F) -> R
     where
         F: FnOnce(Self) -> R,
         Self: Sized;
 }
 
-impl<T> Let for T {
-    fn let_do<R, F>(self, block: F) -> R
+impl<T> Run for T {
+    fn run<R, F>(self, block: F) -> R
     where
         F: FnOnce(Self) -> R,
         Self: Sized,
@@ -163,14 +163,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_also_trait() {
+    fn test_apply_trait() {
         let value = 0;
         let new_value = value
-            .also(|v| {
+            .apply(|v| {
                 assert_eq!(*v, 0);
                 *v += 1;
             })
-            .also(|v| {
+            .apply(|v| {
                 assert_eq!(*v, 1);
             });
 
@@ -179,17 +179,17 @@ mod tests {
     }
 
     #[test]
-    fn test_let_do_trait() {
+    fn test_run_trait() {
         let value = vec![0];
         let new_value = value
             .clone()
-            .let_do(|v| {
+            .run(|v| {
                 assert_eq!(v, vec![0]);
                 let first_item_edited = *v.first().unwrap() + 1;
                 assert_eq!(first_item_edited, 1);
                 first_item_edited
             })
-            .let_do(|v| {
+            .run(|v| {
                 assert_eq!(v, 1);
                 let v_str = format!("{}", v);
                 assert_eq!(v_str, "1");

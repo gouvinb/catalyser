@@ -21,14 +21,14 @@
 //!
 //! ```rust
 //! use catalyser::stdx::{
-//!     scope_functions_extension::Let,
+//!     scope_functions_extension::Run,
 //!     str_extension::MultilineStr,
 //! };
 //!
 //! "
 //!     |Hello
 //!     |World
-//! ".let_do(|it| it.trim_margin())
+//! ".run(|it| it.trim_margin())
 //! ```
 //!
 //! Similarly, for the `serdex` module, ensure the `"serde"` feature is enabled:
