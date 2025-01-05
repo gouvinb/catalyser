@@ -9,7 +9,8 @@ on:
 env:
   CARGO_TERM_COLOR: always
 jobs:
-  build:
+
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,8 +24,18 @@ jobs:
       - name: Check with Clippy
         run: cargo clippy --workspace --all-features --all-targets  -- --deny warnings
 
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Build
         run: cargo build --workspace --all-features --all-targets --verbose
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Run tests
         run: cargo test --workspace --all-features --all-targets --verbose
