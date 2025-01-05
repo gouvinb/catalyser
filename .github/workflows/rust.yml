@@ -60,5 +60,8 @@ jobs:
           else
             echo "run_mode=" >> $GITHUB_ENV
 
-      - name: Cargo Publish
+      - name: Cargo publish catalyser
         run: cargo publish ${{ env.run_mode }} -p cataliser
+
+      #- name: Cargo publish catalyser-derive
+      #  run: cargo publish ${{ env.run_mode }} -p cataliser-derive
