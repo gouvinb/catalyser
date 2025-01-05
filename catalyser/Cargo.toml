@@ -1,5 +1,6 @@
 [package]
 name = "catalyser"
+description = "A comprehensive collection of extensions to simplify and enhane rust development."
 version = "0.1.0"
 keywords = [
     "utils",

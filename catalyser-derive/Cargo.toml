@@ -1,5 +1,6 @@
 [package]
 name = "catalyser-derive"
+description = "A comprehensive collection of derive to simplify and enhane rust development."
 version = "0.1.0"
 keywords = [
     "utils",
