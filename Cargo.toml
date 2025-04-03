@@ -12,7 +12,6 @@ catalyser = { path = "catalyser" }
 authors = ["gouvinb"]
 edition = "2021"
 categories = ["rust-patterns"]
-homepage = ""
 license-file = "LICENSE.md"
 readme = "README.md"
 repository = "https://github.com/gouvinb/catalyser"
