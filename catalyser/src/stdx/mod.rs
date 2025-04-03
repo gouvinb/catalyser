@@ -41,6 +41,6 @@ pub mod error;
 
 pub mod extension;
 
-pub mod primitive_number;
 pub mod collections;
+pub mod primitive_number;
 pub mod string;
