@@ -85,8 +85,9 @@ pub trait StringContentValidator: Sized {
 ///
 /// `ValidatedString` uses the generic type parameter `T` to specify the validator
 /// to apply for content validation.
-#[derive(Serialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 #[cfg_attr(feature = "serde", serde(transparent))]
 pub struct ValidatedString<T: StringContentValidator>(String, PhantomData<T>);
 
