@@ -7,7 +7,7 @@ pub trait MultilineStr {
     /// # Parameters
     ///
     /// * `margin_prefix` - The prefix that marks the start of the margin to be
-    ///                     trimmed.
+    ///   trimmed.
     ///
     /// # Returns
     ///
