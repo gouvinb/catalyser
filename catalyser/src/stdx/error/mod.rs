@@ -1,4 +1,4 @@
-//! This module defines custom errors present in the `serdex` module.
+//! This module defines custom errors present in the `stdx` module.
 //!
 //! These custom errors are used to handle specific cases where the default error types are not
 //! sufficient, providing more context and control over the error handling process.

@@ -58,7 +58,7 @@ impl<S: AsRef<str>> MultilineStr for S {
 
 fn remove_empty_lines<'a>(lines: &[&'a str]) -> Vec<&'a str> {
     let mut iter = lines.iter().peekable();
-    if iter.peek().map_or(false, |&&line| line.is_empty()) {
+    if iter.peek().is_some_and(|&&line| line.is_empty()) {
         iter.next();
     }
 

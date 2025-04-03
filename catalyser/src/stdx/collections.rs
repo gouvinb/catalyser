@@ -16,7 +16,7 @@
 //! # Usage Example
 //!
 //! ```rust
-//! use catalyser::serdex::collection::NonEmptyVec;
+//! use catalyser::stdx::collections::NonEmptyVec;
 //!
 //! let data = vec![1, 2, 3];
 //! let non_empty_vec = NonEmptyVec::new(data).unwrap();
@@ -27,14 +27,14 @@
 //! assert!(result.is_err());
 //! ```
 
-use crate::serdex::error::is_empty_sequence::SequenceContentError;
+use crate::stdx::error::is_empty_sequence::SequenceContentError;
 use serde::{de::Error, Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, LinkedList, VecDeque};
 
 /// A generic non-empty collection wrapper.
 #[derive(Serialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
-#[serde(transparent)]
+#[cfg_attr(feature = "serde", serde(transparent))]
 pub struct NonEmptyCollection<T, C>(C)
 where
     C: IntoIterator<Item = T> + Default;
@@ -85,6 +85,7 @@ where
     }
 }
 
+#[cfg(feature = "serde")]
 impl<'de, T, C> Deserialize<'de> for NonEmptyCollection<T, C>
 where
     T: Deserialize<'de>,

@@ -5,8 +5,6 @@
 //! - `stdx`: Available when the `"std"` feature is enabled. This module provides additional
 //!   utilities and extensions related to the
 //!   [Rust's standard library](https://doc.rust-lang.org/stable/std/).
-//! - `serdex`: Available when the `"serde"` feature is enabled. This module provides utilities
-//!   and extensions for working with [`serde`](https://docs.rs/serde/latest/serde/).
 //!
 //! ## Usage Examples
 //!
@@ -20,7 +18,7 @@
 //! Then, you can import and use items from the `stdx` module:
 //!
 //! ```rust
-//! use catalyser::stdx::{
+//! use catalyser::stdx::extension::{
 //!     scope_functions_extension::Run,
 //!     str_extension::MultilineStr,
 //! };
@@ -28,27 +26,16 @@
 //! "
 //!     |Hello
 //!     |World
-//! ".run(|it| it.trim_margin())
+//! ".run(|it| it.trim_margin());
 //! ```
 //!
-//! Similarly, for the `serdex` module, ensure the `"serde"` feature is enabled:
+//! The `serde` feature ensures that integration with the `serde` crate is enabled.
+//! This allows serialization and deserialization of types when the `serde` feature flag is active.
 //!
 //! ```toml
 //! [dependencies]
 //! catalyser = { version = "x.y.z", features = ["serde"] }
 //! ```
 //!
-//! Then, you can import and use items from the `serdex` module:
-//!
-//! ```rust
-//! use catalyser::serdex::*;
-//!
-//! struct MyStruct(collection::NonEmptyHashMap<string::NonBlankString, number::BoundedI32<0, 100>>);
-//! ```
-//!
 
-#[cfg(feature = "std")]
 pub mod stdx;
-
-#[cfg(feature = "serde")]
-pub mod serdex;

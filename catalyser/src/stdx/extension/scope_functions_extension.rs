@@ -23,7 +23,7 @@
 //! ### `Apply` Trait
 //!
 //! ```rust
-//! use catalyser::stdx::scope_functions_extension::Apply;
+//! use catalyser::stdx::extension::scope_functions_extension::Apply;
 //!
 //! let value = 0;
 //! let result = value
@@ -34,7 +34,7 @@
 //! ### `Run` Trait
 //!
 //! ```rust
-//! use catalyser::stdx::scope_functions_extension::Run;
+//! use catalyser::stdx::extension::scope_functions_extension::Run;
 //!
 //! let value = vec![0];
 //! let transformed = value
@@ -46,7 +46,7 @@
 //! ### `TakeIf` Trait
 //!
 //! ```rust
-//! use catalyser::stdx::scope_functions_extension::TakeIf;
+//! use catalyser::stdx::extension::scope_functions_extension::TakeIf;
 //!
 //! let value = 10;
 //! assert_eq!(value.take_if(|&v| v > 5), Some(10));
@@ -56,7 +56,7 @@
 //! ### `TakeUnless` Trait
 //!
 //! ```rust
-//! use catalyser::stdx::scope_functions_extension::TakeUnless;
+//! use catalyser::stdx::extension::scope_functions_extension::TakeUnless;
 //!
 //! let value = 10;
 //! assert_eq!(value.take_unless(|&v| v > 5), None);
@@ -66,7 +66,7 @@
 //! ### `repeat` Function
 //!
 //! ```rust
-//! use catalyser::stdx::scope_functions_extension::repeat;
+//! use catalyser::stdx::extension::scope_functions_extension::repeat;
 //!
 //! let mut sum = 0;
 //! repeat(5, |index| {

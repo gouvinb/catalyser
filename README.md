@@ -12,7 +12,7 @@ Add the following dependencies to your Cargo.toml:
 
 ```toml
 [dependencies]
-catalyser = { version = "x.y.z", features = ["derive", "std"] }
+catalyser = { version = "x.y.z", features = ["serde"] }
 ```
 
 Replace `"x.y.z"` with the latest version of the crate.
@@ -20,8 +20,6 @@ Replace `"x.y.z"` with the latest version of the crate.
 ### Features
 
 [//]: # (- `derive`: Automate recurring tasks with custom derive macros.)
-- `std`: Add useful methods or types not available
-  in Rust's standard library.
 - `serde`: Enhance common serialization and
   deserialization tasks by introducing new types, such as `NonEmptyString`,
   `BoundedI32`, and others, to streamline data handling and ensure type safety.

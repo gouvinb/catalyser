@@ -19,7 +19,12 @@
 //! minimum and maximum values.
 //!
 //! ```rust
-//! use catalyser::serdex::number::BoundedI8;
+//! use serde::{de::Error, Deserialize, Serialize};
+//! use std::fmt::{Display, Formatter};
+//! use catalyser::stdx::{
+//!     error::out_of_bound::OutOfBoundsError,
+//!     primitive_number::BoundedI8
+//! };
 //!
 //! // Successfully create a bounded integer
 //! let value: BoundedI8<0, 100> = BoundedI8::new(42).unwrap();
@@ -36,7 +41,15 @@
 //! specific range.
 //!
 //! ```rust
-//! use catalyser::generate_bounded_float;
+//! use serde::{de::Error, Deserialize, Serialize};
+//! use std::fmt::{Display, Formatter};
+//! use catalyser::{
+//!     generate_bounded_float,
+//!     stdx::{
+//!         error::out_of_bound::OutOfBoundsError,
+//!         primitive_number::BoundedI8,
+//!     }
+//! };
 //!
 //! generate_bounded_float!(BoundedF32, 0.0, 100.0, f32);
 //!
@@ -55,16 +68,17 @@
 //! provided macros in your own codebase. Both integer and floating-point types are supported, and
 //! the bounds can be fully customized.
 
-use crate::serdex::error::out_of_bound::OutOfBoundsError;
+use crate::stdx::error::out_of_bound::OutOfBoundsError;
 use serde::{de::Error, Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
+#[macro_export]
 macro_rules! generate_bounded_num {
     ($name:ident, $type_name:ident) => {
         #[doc = concat!("A [`", stringify!($name), "`](", stringify!($name), ")` that's bounded between two values (inclusive)")]
-        #[derive(Serialize, Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+        #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
         #[repr(transparent)]
-        #[serde(transparent)]
+        #[cfg_attr(feature = "serde", derive(Serialize), serde(transparent))]
         pub struct $name<const MIN: $type_name, const MAX: $type_name>($type_name);
 
         impl<const MIN: $type_name, const MAX: $type_name> $name<MIN, MAX> {
@@ -117,6 +131,7 @@ macro_rules! generate_bounded_num {
             }
         }
 
+        #[cfg(feature = "serde")]
         impl<'de, const MIN: $type_name, const MAX: $type_name> Deserialize<'de> for $name<MIN, MAX> {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
@@ -160,9 +175,14 @@ generate_bounded_num!(BoundedUsize, usize);
 /// # Example
 ///
 /// ```rust
-/// use catalyser::serdex::{
-///     error::out_of_bound::OutOfBoundsError,
-///     number::generate_bounded_float,
+/// use serde::{de::Error, Deserialize, Serialize};
+/// use std::fmt::{Display, Formatter};
+/// use catalyser::{
+///     generate_bounded_float,
+///     stdx::{
+///         error::out_of_bound::OutOfBoundsError,
+///         primitive_number::BoundedI8,
+///     }
 /// };
 ///
 /// generate_bounded_float!(BoundedF32, 0.0, 100.0, f32);
@@ -191,9 +211,9 @@ generate_bounded_num!(BoundedUsize, usize);
 macro_rules! generate_bounded_float {
     ($name:ident, $min:expr, $max:expr, $type_name:ident) => {
         #[doc = concat!("A [`", stringify!($name), "`](", stringify!($name), ")` that's bounded between two values (inclusive)")]
-        #[derive(Serialize, Debug, Copy, Clone, PartialEq, PartialOrd)]
+        #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
         #[repr(transparent)]
-        #[serde(transparent)]
+        #[cfg_attr(feature = "serde", derive(Serialize), serde(transparent))]
         pub struct $name($type_name);
 
         impl $name {
@@ -249,6 +269,7 @@ macro_rules! generate_bounded_float {
             }
         }
 
+        #[cfg(feature = "serde")]
         impl<'de> serde::Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
@@ -270,6 +291,7 @@ macro_rules! generate_bounded_float {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(feature = "serde")]
     use serde_json;
 
     #[test]
@@ -354,6 +376,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "serde")]
     fn test_bounded_num_serde() {
         macro_rules! generate_bounded_num_serde_test {
             ($type_name:ident) => {
@@ -441,6 +464,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "serde")]
     fn test_bounded_float_serde() {
         macro_rules! generate_bounded_float_serde_test {
             ($bounded_type_name:ident, $type_name:ident) => {

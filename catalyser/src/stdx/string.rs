@@ -30,7 +30,7 @@
 //! ## Examples
 //!
 //! ```rust
-//! use catalyser::serdex::string::{NonEmptyString, NonBlankString};
+//! use catalyser::stdx::string::{NonEmptyString, NonBlankString};
 //!
 //! // Using NonEmptyString
 //! let valid_non_empty = NonEmptyString::new("Hello".to_string());
@@ -53,7 +53,7 @@
 //! instances without validation. Only use this method when you are certain the input complies with
 //! the expected validation rules.
 
-use crate::serdex::error::is_empty_or_blank_string::StringContentError;
+use crate::stdx::error::is_empty_or_blank_string::StringContentError;
 use serde::{de::Error, Deserialize, Serialize};
 use std::{
     fmt::{Display, Formatter, Result as FmtResult},
@@ -86,7 +86,7 @@ pub trait StringContentValidator: Sized {
 /// to apply for content validation.
 #[derive(Serialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
-#[serde(transparent)]
+#[cfg_attr(feature = "serde", serde(transparent))]
 pub struct ValidatedString<T: StringContentValidator>(String, PhantomData<T>);
 
 impl<T: StringContentValidator> ValidatedString<T> {
@@ -130,6 +130,7 @@ impl<T: StringContentValidator> Display for ValidatedString<T> {
     }
 }
 
+#[cfg(feature = "serde")]
 impl<'de, T: StringContentValidator> Deserialize<'de> for ValidatedString<T> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -189,7 +190,7 @@ impl StringContentValidator for NonBlankValidator {
 /// # Examples
 ///
 /// ```
-/// use catalyser::serdex::string::NonEmptyString;
+/// use catalyser::stdx::string::NonEmptyString;
 ///
 /// let valid = NonEmptyString::new("Hello".to_string());
 /// assert!(valid.is_ok());
@@ -204,7 +205,7 @@ pub type NonEmptyString = ValidatedString<NonEmptyValidator>;
 /// # Examples
 ///
 /// ```
-/// use catalyser::serdex::string::NonBlankString;
+/// use catalyser::stdx::string::NonBlankString;
 ///
 /// let valid = NonBlankString::new("Hello".to_string());
 /// assert!(valid.is_ok());
