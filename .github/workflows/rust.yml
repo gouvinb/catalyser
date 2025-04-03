@@ -66,8 +66,15 @@ jobs:
             echo "run_mode=" >> $GITHUB_ENV
           fi
 
+      - name: Cargo package catalyser
+        run: cargo package
+
       - name: Cargo publish catalyser
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: cargo publish ${{ env.run_mode }} -p catalyser
 
-      #- name: Cargo publish catalyser-derive
-      #  run: cargo publish ${{ env.run_mode }} -p catalyser-derive
+      # - name: Cargo publish catalyser-derive
+      #   env:
+      #     CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      #   run: cargo publish ${{ env.run_mode }} -p catalyser-derive
