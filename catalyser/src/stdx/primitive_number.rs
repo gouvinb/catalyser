@@ -69,6 +69,7 @@
 //! the bounds can be fully customized.
 
 use crate::stdx::error::out_of_bound::OutOfBoundsError;
+#[cfg(feature = "serde")]
 use serde::{de::Error, Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 

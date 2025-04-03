@@ -54,6 +54,7 @@
 //! the expected validation rules.
 
 use crate::stdx::error::is_empty_or_blank_string::StringContentError;
+#[cfg(feature = "serde")]
 use serde::{de::Error, Deserialize, Serialize};
 use std::{
     fmt::{Display, Formatter, Result as FmtResult},

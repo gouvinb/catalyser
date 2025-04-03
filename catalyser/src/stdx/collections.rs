@@ -28,6 +28,7 @@
 //! ```
 
 use crate::stdx::error::is_empty_sequence::SequenceContentError;
+#[cfg(feature = "serde")]
 use serde::{de::Error, Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, LinkedList, VecDeque};
 
