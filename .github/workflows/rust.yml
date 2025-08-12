@@ -19,6 +19,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Show versions (debug)
+        run: |
+          cargo --version
+          cargo fmt --version
+          cargo clippy --version
+
       - name: Check style
         run: cargo fmt --all -- --check
 
