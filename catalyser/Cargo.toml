@@ -16,10 +16,10 @@ repository.workspace = true
 
 
 [dependencies]
-serde = { version = "1.0.216", features = ["derive"], optional = true }
+serde = { version = "1.0.219", features = ["derive"], optional = true }
 
 [dev-dependencies]
-serde_json = { version = "1.0.134" }
+serde_json = { version = "1.0.142" }
 
 [features]
 default = []
