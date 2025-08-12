@@ -133,6 +133,7 @@ mod tests {
     // the expanded macro-generated code for better understanding and debugging.
 
     use super::*;
+    #[cfg(feature = "serde")]
     use serde_json;
 
     #[test]
@@ -278,6 +279,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "serde")]
     fn test_nonempty_collection_serde() {
         let data_vec = vec![1, 2, 3];
 

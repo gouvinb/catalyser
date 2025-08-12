@@ -289,7 +289,8 @@ mod tests {
     }
 
     #[test]
-    fn test_serde_non_empty_string() {
+    #[cfg(feature = "serde")]
+    fn test_non_empty_string_serde() {
         let input = "Serialize Test".to_string();
         let non_empty = NonEmptyString::new(input.clone()).unwrap();
 
@@ -303,7 +304,8 @@ mod tests {
     }
 
     #[test]
-    fn test_serde_non_blank_string() {
+    #[cfg(feature = "serde")]
+    fn test_non_blank_string_serde() {
         let input = "Serialize Test".to_string();
         let non_blank = NonBlankString::new(input.clone()).unwrap();
 
