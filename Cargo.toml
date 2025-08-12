@@ -10,7 +10,7 @@ catalyser = { path = "catalyser" }
 
 [workspace.package]
 authors = ["gouvinb"]
-edition = "2021"
+edition = "2024"
 categories = ["rust-patterns"]
 license-file = "LICENSE.md"
 readme = "README.md"
