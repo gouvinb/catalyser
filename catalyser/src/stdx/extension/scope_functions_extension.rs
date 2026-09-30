@@ -118,11 +118,7 @@ impl<T> TakeIf for T {
     where
         F: FnOnce(&Self) -> bool,
     {
-        if predicate(&self) {
-            Some(self)
-        } else {
-            None
-        }
+        if predicate(&self) { Some(self) } else { None }
     }
 }
 
@@ -138,11 +134,7 @@ impl<T> TakeUnless for T {
     where
         F: FnOnce(&Self) -> bool,
     {
-        if !predicate(&self) {
-            Some(self)
-        } else {
-            None
-        }
+        if !predicate(&self) { Some(self) } else { None }
     }
 }
 

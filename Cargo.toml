@@ -1,5 +1,5 @@
 [workspace]
-resolver = "2"
+resolver = "3"
 members = [
     "catalyser",
     "catalyser-derive"
@@ -13,5 +13,10 @@ authors = ["gouvinb"]
 edition = "2024"
 categories = ["rust-patterns"]
 license-file = "LICENSE.md"
+license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/gouvinb/catalyser"
+
+[workspace.dependencies]
+serde = { version = "1.0.229" }
+serde_json = { version = "1.0.151" }

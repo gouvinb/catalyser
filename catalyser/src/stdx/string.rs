@@ -55,9 +55,17 @@
 
 use crate::stdx::error::is_empty_or_blank_string::StringContentError;
 #[cfg(feature = "serde")]
-use serde::{de::Error, Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+    de::Error,
+};
 use std::{
-    fmt::{Display, Formatter, Result as FmtResult},
+    fmt::{
+        Display,
+        Formatter,
+        Result as FmtResult,
+    },
     marker::PhantomData,
 };
 

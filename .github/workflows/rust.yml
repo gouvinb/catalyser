@@ -14,19 +14,45 @@ env:
   CARGO_TERM_COLOR: always
 jobs:
 
+  deny:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check bans, licenses and sources
+        uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check bans licenses sources
+          arguments: --workspace
+
+  advisories:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check advisories
+        uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check advisories
+          arguments: --workspace
+
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
+
+      - name: Install nightly rustfmt
+        run: rustup toolchain install nightly --profile minimal --component rustfmt
 
       - name: Show versions (debug)
         run: |
           cargo --version
-          cargo fmt --version
+          cargo +nightly fmt --version
           cargo clippy --version
 
       - name: Check style
-        run: cargo fmt --all -- --check
+        run: cargo +nightly  fmt --all -- --check
 
       - name: Check with `cargo check`
         run: cargo check --workspace --all-features --all-targets
@@ -38,7 +64,7 @@ jobs:
     needs: [check]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Build
         run: cargo build --workspace --all-features --all-targets --verbose
@@ -47,17 +73,17 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Run tests
         run: cargo test --workspace --all-features --all-targets --verbose
 
   publish:
-    needs: [test]
+    needs: [test, deny]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Extract tag name
         id: tag_name
@@ -73,7 +99,10 @@ jobs:
           fi
 
       - name: Cargo package catalyser
-        run: cargo package
+        run: cargo package -p catalyser
+
+      # - name: Cargo package catalyser-derive
+      #   run: cargo package -p catalyser-derive
 
       - name: Cargo publish catalyser
         env:
