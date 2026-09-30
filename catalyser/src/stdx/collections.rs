@@ -29,8 +29,19 @@
 
 use crate::stdx::error::is_empty_sequence::SequenceContentError;
 #[cfg(feature = "serde")]
-use serde::{de::Error, Deserialize, Serialize};
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, LinkedList, VecDeque};
+use serde::{
+    Deserialize,
+    Serialize,
+    de::Error,
+};
+use std::collections::{
+    BTreeMap,
+    BTreeSet,
+    HashMap,
+    HashSet,
+    LinkedList,
+    VecDeque,
+};
 
 /// A generic non-empty collection wrapper.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -228,7 +239,10 @@ mod tests {
                 let $collection_name: $collection_type = data_vec.clone().into_iter().collect();
 
                 let $nonempty_collection_name = unsafe { <$nonempty_collection_type>::new_unchecked($collection_name.clone()) };
-                assert_eq!($nonempty_collection_name.into_inner(), $collection_name);
+                assert_eq!(
+                    $nonempty_collection_name.into_inner(),
+                    $collection_name
+                );
             };
         }
 
@@ -270,7 +284,10 @@ mod tests {
                 let $collection_name: $collection_type = data_map.clone().into_iter().collect();
 
                 let $nonempty_collection_name = unsafe { <$nonempty_collection_type>::new_unchecked($collection_name.clone()) };
-                assert_eq!($nonempty_collection_name.into_inner(), $collection_name);
+                assert_eq!(
+                    $nonempty_collection_name.into_inner(),
+                    $collection_name
+                );
             };
         }
 

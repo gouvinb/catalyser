@@ -4,7 +4,11 @@
 //! The module also provides implementations of the `Debug` and `Display` traits for
 //! `SequenceContentError`, enabling error representation in different formats.
 
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::{
+    Debug,
+    Display,
+    Formatter,
+};
 
 /// Represents possible errors related to sequence validation.
 pub enum SequenceContentError {

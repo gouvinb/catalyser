@@ -5,7 +5,11 @@
 //! The module also provides implementations of the `Debug` and `Display` traits for
 //! `StringContentError`, enabling error representation in different formats.
 
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::{
+    Debug,
+    Display,
+    Formatter,
+};
 
 /// Represents possible errors related to string content validation.
 pub enum StringContentError {

@@ -1,5 +1,5 @@
 [workspace]
-resolver = "2"
+resolver = "3"
 members = [
     "catalyser",
     "catalyser-derive"
@@ -17,8 +17,6 @@ license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/gouvinb/catalyser"
 
-[dependencies]
+[workspace.dependencies]
 serde = { version = "1.0.229" }
-
-[dev-dependencies]
 serde_json = { version = "1.0.151" }

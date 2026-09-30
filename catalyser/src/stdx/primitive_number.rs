@@ -70,8 +70,15 @@
 
 use crate::stdx::error::out_of_bound::OutOfBoundsError;
 #[cfg(feature = "serde")]
-use serde::{de::Error, Deserialize, Serialize};
-use std::fmt::{Display, Formatter};
+use serde::{
+    Deserialize,
+    Serialize,
+    de::Error,
+};
+use std::fmt::{
+    Display,
+    Formatter,
+};
 
 #[macro_export]
 macro_rules! generate_bounded_num {

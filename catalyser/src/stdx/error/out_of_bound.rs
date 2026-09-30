@@ -6,7 +6,11 @@
 //! `OutOfBoundsError`, allowing for detailed and user-friendly error representations in various
 //! formats.
 
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::{
+    Debug,
+    Display,
+    Formatter,
+};
 
 /// An error type representing cases when a value is out of bounds.
 pub enum OutOfBoundsError<T> {
