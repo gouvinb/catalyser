@@ -45,11 +45,11 @@ jobs:
       - name: Show versions (debug)
         run: |
           cargo --version
-          cargo fmt --version
+          cargo +nightly fmt --version
           cargo clippy --version
 
       - name: Check style
-        run: cargo fmt --all -- --check
+        run: cargo +nightly  fmt --all -- --check
 
       - name: Check with `cargo check`
         run: cargo check --workspace --all-features --all-targets
