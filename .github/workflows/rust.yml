@@ -14,6 +14,29 @@ env:
   CARGO_TERM_COLOR: always
 jobs:
 
+  deny:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check bans, licenses and sources
+        uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check bans licenses sources
+          arguments: --workspace
+
+  advisories:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check advisories
+        uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check advisories
+          arguments: --workspace
+
   check:
     runs-on: ubuntu-latest
     steps:
@@ -53,7 +76,7 @@ jobs:
         run: cargo test --workspace --all-features --all-targets --verbose
 
   publish:
-    needs: [test]
+    needs: [test, deny]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
@@ -73,7 +96,10 @@ jobs:
           fi
 
       - name: Cargo package catalyser
-        run: cargo package
+        run: cargo package -p catalyser
+
+      # - name: Cargo package catalyser-derive
+      #   run: cargo package -p catalyser-derive
 
       - name: Cargo publish catalyser
         env:

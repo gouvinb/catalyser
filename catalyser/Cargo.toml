@@ -11,15 +11,16 @@ authors.workspace = true
 edition.workspace = true
 categories.workspace = true
 license-file.workspace = true
+license.workspace = true
 readme.workspace = true
 repository.workspace = true
 
 
 [dependencies]
-serde = { version = "1.0.219", features = ["derive"], optional = true }
+serde = { workspace = true, features = ["derive"], optional = true }
 
 [dev-dependencies]
-serde_json = { version = "1.0.142" }
+serde_json.workspace = true
 
 [features]
 default = []
