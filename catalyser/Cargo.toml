@@ -10,7 +10,6 @@ keywords = [
 authors.workspace = true
 edition.workspace = true
 categories.workspace = true
-license-file.workspace = true
 license.workspace = true
 readme.workspace = true
 repository.workspace = true
@@ -26,7 +25,7 @@ serde_json.workspace = true
 default = []
 
 # Provide `catalyser` unstable functionality.
-unstable = []
+#unstable = []
 
 # Provide derive macros.
 derive = []
