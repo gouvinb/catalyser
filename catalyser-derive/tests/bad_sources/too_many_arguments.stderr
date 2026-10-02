@@ -1,0 +1,10 @@
+error: too many arguments: `connect` takes 3 parameter(s)
+ --> tests/bad_sources/too_many_arguments.rs:3:1
+  |
+3 | #[overloads]
+  | ^^^^^^^^^^^^
+...
+9 |     let _ = connect!("h", 1, 2, 3);
+  |             ---------------------- in this macro invocation
+  |
+  = note: this error originates in the macro `connect` (in Nightly builds, run with -Z macro-backtrace for more info)

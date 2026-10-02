@@ -19,10 +19,60 @@ Replace `"x.y.z"` with the latest version of the crate.
 
 ### Features
 
-[//]: # (- `derive`: Automate recurring tasks with custom derive macros.)
 - `serde`: Enhance common serialization and
   deserialization tasks by introducing new types, such as `NonEmptyString`,
   `BoundedI32`, and others, to streamline data handling and ensure type safety.
+- Default and named parameters (`derive` feature): Rust has no default or named
+  arguments. `#[overloads]` adds both to free functions, Kotlin-style:
+
+  ```rust
+  use catalyser::overloads;
+  use std::time::Duration::{self, from_secs};
+  
+  #[overloads]
+  pub fn connect(
+      host: &str,
+      #[default(5432)] port: u16,
+      #[default(from_secs(5))] timeout: Duration,
+  ) -> String {
+      format!("{host}:{port} ({}s)", timeout.as_secs())
+  }
+  
+  pub fn main() {
+      // the plain function still works
+      connect("localhost", 5432, from_secs(5));
+
+      // `use` imports the function *and* its call macro.
+      connect!("localhost");       // overloads for port and timeout
+      connect!("localhost", 1234); // positional
+
+      // with any order
+      connect!(timeout = from_secs(1), host = "localhost");
+      connect!("localhost", timeout = from_secs(1));
+      connect!(timeout = from_secs(1), "localhost");
+  }
+  ```
+  - A default is any expression. It is evaluated where the function is defined,
+    so it can use that module's imports and the parameters declared before it
+    (`#[default(http + 363)] https: u16`).
+  - Positional arguments come first, then named ones. Misuse (missing, unknown,
+    duplicated or too many arguments) is a compile error.
+  - **Limitations**
+    - Free functions only: no methods (`self`), `const fn`, `unsafe fn`,
+      `extern` functions or `impl Trait` parameters with a default (use a named
+      generic instead).
+    - The call macro is crate-local (`pub(crate)`), so it cannot be used from
+      another crate.
+    - Import the function by name: `use path::connect as other;` breaks the call
+      macro.
+    - Arguments are evaluated in declaration order, not in the order written at
+      the call site.
+
+**Alternatives.** If you prefer the builder pattern,
+[`bon`](https://crates.io/crates/bon) is an excellent, mature choice
+(`#[builder]` on functions and structs, with `Option<T>` and
+`#[builder(default)]` support). Catalyser targets a different ergonomic: a
+Kotlin-like call syntax, `f!(a, b = 2)`.
 
 ## Contributing
 

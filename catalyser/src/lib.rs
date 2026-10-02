@@ -39,3 +39,6 @@
 //!
 
 pub mod stdx;
+
+#[cfg(feature = "derive")]
+pub use catalyser_derive::overloads;
