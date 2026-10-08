@@ -1,0 +1,5 @@
+error: #[overloads] only supports free functions (no `self` receiver)
+ --> tests/bad_sources/self_receiver.rs:6:10
+  |
+6 |     fn m(&self, #[default(1)] a: u8) -> u8 {
+  |          ^^^^^

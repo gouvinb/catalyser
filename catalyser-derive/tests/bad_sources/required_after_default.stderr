@@ -1,0 +1,5 @@
+error: parameter `host` has no default but follows `port`, which does; move all `#[default]` parameters to the end of the signature
+ --> tests/bad_sources/required_after_default.rs:4:40
+  |
+4 | fn connect(#[default(5432)] port: u16, host: &str) {}
+  |                                        ^^^^

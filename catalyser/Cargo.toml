@@ -16,6 +16,7 @@ repository.workspace = true
 
 
 [dependencies]
+catalyser-derive = { workspace = true, optional = true }
 serde = { workspace = true, features = ["derive"], optional = true }
 
 [dev-dependencies]
@@ -28,7 +29,7 @@ default = []
 #unstable = []
 
 # Provide derive macros.
-derive = []
+derive = ["dep:catalyser-derive"]
 
 # Provide `catalyser` for serde library.
 # Requires a serde dependency.

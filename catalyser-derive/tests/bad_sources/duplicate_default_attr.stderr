@@ -1,0 +1,5 @@
+error: duplicate #[default] attribute
+ --> tests/bad_sources/duplicate_default_attr.rs:4:20
+  |
+4 | fn f(#[default(1)] #[default(2)] a: u8) -> u8 {
+  |                    ^^^^^^^^^^^^^

@@ -1,0 +1,5 @@
+error: #[overloads]: the parameter must be a plain identifier
+ --> tests/bad_sources/destructured_param.rs:4:6
+  |
+4 | fn f((a, b): (u8, u8)) -> u8 {
+  |      ^^^^^^

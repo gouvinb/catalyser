@@ -1,0 +1,5 @@
+error: #[overloads] does not support `unsafe` functions
+ --> tests/bad_sources/unsafe_fn.rs:4:1
+  |
+4 | unsafe fn f(#[default(1)] a: u8) -> u8 {
+  | ^^^^^^
