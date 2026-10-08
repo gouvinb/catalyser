@@ -1,48 +1,78 @@
 #!/usr/bin/env nu
 #-*- nushell-ts -*-
 
-use std/log
+################################################################################
+# Utils
+################################################################################
+
+def log-levels [] {
+    [
+        "trace"
+        "debug"
+        "info"
+        "warning"
+        "error"
+        "critical"
+    ]
+}
+
+def log [level: string@log-levels, tag: string, message: string] {
+    let color = (
+        match $level {
+            "trace" => (ansi "bold")
+            "debug" => (ansi "cyan_bold")
+            "info" => (ansi "blue_bold")
+            "warning" => (ansi "magenta_bold")
+            "error" => (ansi "red_bold")
+            "critical" => (ansi "red_reverse")
+        }
+    )
+    let timestamp = $"(date now | format date "%Y-%m-%dT%H:%M:%S%.3f")"
+    let fmt_message = $"(ansi reset_bold)($message)(ansi reset)"
+
+    print $"($color)($timestamp)|($level)|($tag)> ($fmt_message)"
+}
 
 ################################################################################
 # Jobs section
 ################################################################################
 
 def job_deny [] {
-    print "Check bans, licenses and sources"
+    log info "job_deny" "Check bans, licenses and sources"
     cargo deny --workspace check bans licenses sources
 }
 
 def job_advisories [] {
-    print "Check advisories"
+    log info "job_advisories" "Check advisories"
     cargo deny --workspace check advisories
 }
 
 def job_check [] {
-    print "Check style"
-    cargo +nightly  fmt --all -- --check
+    log info "job_check" "Check style"
+    cargo +nightly fmt --all -- --check
 
-    print "Check with `cargo check`"
+    log info "job_check" "Check with `cargo check`"
     cargo check --workspace --all-features --all-targets
 
-    print "Check with Clippy"
-    cargo clippy --workspace --all-features --all-targets  -- --deny warnings
+    log info "job_check" "Check with Clippy"
+    cargo clippy --workspace --all-features --all-targets -- --deny warnings
 }
 
 def job_build [] {
-    print "Build"
+    log info "job_build" "Build"
     cargo build --workspace --all-features --all-targets --verbose
 }
 
 def job_test [] {
-    print "Run tests"
+    log info "job_test" "Run tests"
     cargo test --workspace --all-features --all-targets --verbose
 }
 
-def job_publish [ tag: string ] {
-    print "Extract tag name"
+def job_publish [tag: string] {
+    log info "job_publish" "Extract tag name"
     let tag_name = $tag
 
-    print "Check if dry-run is needed"
+    log info "job_publish" "Check if dry-run is needed"
     let run_mode = (
         if $tag_name =~ r#'^v[0-9]+\.[0-9]+\.[0-9]+-dry-run$'# {
             "--dry-run"
@@ -51,40 +81,39 @@ def job_publish [ tag: string ] {
         }
     )
 
-    print "Cargo package catalyser"
+    log info "job_publish" "Cargo package catalyser"
     cargo package -p catalyser
 
-    print "Cargo package catalyser-derive"
+    log info "job_publish" "Cargo package catalyser-derive"
     cargo package -p catalyser-derive
 
-    print "Cargo publish catalyser"
+    log info "job_publish" "Cargo publish catalyser"
     cargo publish $run_mode -p catalyser
 
-    print "Cargo publish catalyser-derive"
+    log info "job_publish" "Cargo publish catalyser-derive"
     cargo publish $run_mode -p catalyser-derive
 }
-
 
 ################################################################################
 # On section
 ################################################################################
 
-def push_branch [ branch: string ] {
+def push_branch [branch: string] {
     if $branch == "main" {
-        print $"Do workflow on push branch[($branch)]..."
+        log info "push_branch" $"Do workflow on push branch[($branch)]..."
         job_deny
         try { job_advisories }
         job_check
         job_build
         job_test
     } else {
-        print $"Skip workflow on push branch[($branch)]..."
+        print $"push_branch> Skip workflow on push branch[($branch)]..."
     }
 }
 
-def push_tag [ tag: string ] {
+def push_tag [tag: string] {
     if $tag =~ r#'^v[0-9]+\.[0-9]+\.[0-9]+(-([0-9]+|dry-run))?$'# {
-        print $"Do workflow on push tag[($tag)]..."
+        log info "push_tag" $"Do workflow on push tag[($tag)]..."
         job_deny
         try { job_advisories }
         job_check
@@ -92,20 +121,28 @@ def push_tag [ tag: string ] {
         job_test
         job_publish $tag
     } else {
-        print $"Skip workflow on push tag[($tag)]..."
+        log info "push_tag" $"Skip workflow on push tag[($tag)]..."
     }
 }
 
-def pull_request [ dest_branch: string ] {
+def pull_request [dest_branch: string] {
     if $dest_branch == "main" {
-        print $"Do workflow on pull_request branch[($dest_branch)]..."
+        (log
+            info
+            "pull_request"
+            $"Do workflow on pull_request branch[($dest_branch)]..."
+        )
         job_deny
         try { job_advisories }
         job_check
         job_build
         job_test
     } else {
-        print $"Skip workflow on pull_request branch[($dest_branch)]..."
+        (log
+            info
+            "pull_request"
+            $"Skip workflow on pull_request branch[($dest_branch)]..."
+        )
     }
 }
 
@@ -114,12 +151,9 @@ def pull_request [ dest_branch: string ] {
 ################################################################################
 
 # On push workflow
-def "main push" [
-    --branch(-b): string
-    --tag(-t): string
-] {
+def "main push" [--branch(-b): string, --tag(-t): string] {
     if ($branch != null and $tag != null) or ($branch == null and $tag == null) {
-        error make -u { msg: "Only one of --branch or --tag should be not null" }
+        error make -u {msg: "Only one of --branch or --tag should be not null"}
     } else if $branch != null {
         push_branch $branch
     } else if $tag != null {
@@ -128,13 +162,11 @@ def "main push" [
 }
 
 # On pull_request workflow
-def "main pull_request" [
-    --branch(-b): string = "main"
-] {
+def "main pull_request" [--branch(-b): string = "main"] {
     pull_request $branch
 }
 
 # Make script for agwaita
-def main []: [nothing -> nothing] {
-  help main
+def main []: nothing -> nothing {
+    help main
 }
