@@ -1,0 +1,5 @@
+error: #[overloads]: a parameter with a default cannot be `impl Trait` (its type cannot be inferred when the argument is omitted); use a named generic parameter instead
+ --> tests/bad_sources/impl_trait_with_default.rs:4:23
+  |
+4 | fn f(#[default(1)] a: impl Into<u8>) -> u8 {
+  |                       ^^^^^^^^^^^^^
