@@ -1,10 +1,7 @@
-error: missing required argument `host`
- --> tests/bad_sources/missing_required_no_args.rs:3:1
+error: cannot find macro `connect` in this scope
+ --> tests/bad_sources/missing_required_no_args.rs:9:13
   |
-3 | #[overloads]
-  | ^^^^^^^^^^^^
-...
 9 |     let _ = connect!();
-  |             ---------- in this macro invocation
+  |             ^^^^^^^
   |
-  = note: this error originates in the macro `connect` (in Nightly builds, run with -Z macro-backtrace for more info)
+  = note: `connect` is in scope, but it is a function, not a macro

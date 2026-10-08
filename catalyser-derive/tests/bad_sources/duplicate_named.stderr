@@ -1,10 +1,7 @@
-error: argument `port` is specified more than once
- --> tests/bad_sources/duplicate_named.rs:3:1
+error: cannot find macro `connect` in this scope
+ --> tests/bad_sources/duplicate_named.rs:9:13
   |
-3 | #[overloads]
-  | ^^^^^^^^^^^^
-...
 9 |     let _ = connect!("h", port = 1, port = 2);
-  |             --------------------------------- in this macro invocation
+  |             ^^^^^^^
   |
-  = note: this error originates in the macro `connect` (in Nightly builds, run with -Z macro-backtrace for more info)
+  = note: `connect` is in scope, but it is a function, not a macro
