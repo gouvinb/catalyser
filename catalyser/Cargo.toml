@@ -10,13 +10,13 @@ keywords = [
 authors.workspace = true
 edition.workspace = true
 categories.workspace = true
-license-file.workspace = true
 license.workspace = true
 readme.workspace = true
 repository.workspace = true
 
 
 [dependencies]
+catalyser-derive = { workspace = true, optional = true }
 serde = { workspace = true, features = ["derive"], optional = true }
 
 [dev-dependencies]
@@ -26,10 +26,10 @@ serde_json.workspace = true
 default = []
 
 # Provide `catalyser` unstable functionality.
-unstable = []
+#unstable = []
 
 # Provide derive macros.
-derive = []
+derive = ["dep:catalyser-derive"]
 
 # Provide `catalyser` for serde library.
 # Requires a serde dependency.

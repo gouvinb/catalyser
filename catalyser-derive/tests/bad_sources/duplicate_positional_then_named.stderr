@@ -1,0 +1,7 @@
+error: cannot find macro `connect` in this scope
+ --> tests/bad_sources/duplicate_positional_then_named.rs:9:13
+  |
+9 |     let _ = connect!("h", 1, port = 2);
+  |             ^^^^^^^
+  |
+  = note: `connect` is in scope, but it is a function, not a macro

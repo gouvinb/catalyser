@@ -1,0 +1,7 @@
+error: cannot find macro `connect` in this scope
+ --> tests/bad_sources/too_many_arguments.rs:9:13
+  |
+9 |     let _ = connect!("h", 1, 2, 3);
+  |             ^^^^^^^
+  |
+  = note: `connect` is in scope, but it is a function, not a macro

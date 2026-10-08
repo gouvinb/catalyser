@@ -1,0 +1,7 @@
+error: cannot find macro `connect` in this scope
+ --> tests/bad_sources/missing_required.rs:9:13
+  |
+9 |     let _ = connect!(port = 1);
+  |             ^^^^^^^
+  |
+  = note: `connect` is in scope, but it is a function, not a macro

@@ -1,0 +1,5 @@
+error: duplicate parameter name
+ --> tests/bad_sources/duplicate_param_names.rs:4:13
+  |
+4 | fn f(a: u8, a: u8) {}
+  |             ^
