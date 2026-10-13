@@ -5,9 +5,6 @@ members = [
     "catalyser-derive"
 ]
 
-[patch.crates-io]
-catalyser = { path = "catalyser" }
-
 [workspace.package]
 authors = ["gouvinb"]
 edition = "2024"
@@ -18,7 +15,7 @@ readme = "README.md"
 repository = "https://github.com/gouvinb/catalyser"
 
 [workspace.dependencies]
-catalyser-derive = { path = "catalyser-derive" }
+catalyser-derive = { version = "0.2.0", path = "catalyser-derive" }
 
 pollster = "1.0.1"
 proc-macro2 = "1.0.107"
