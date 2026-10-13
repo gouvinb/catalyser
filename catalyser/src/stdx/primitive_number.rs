@@ -21,13 +21,12 @@
 //! # }
 //! ```
 
-use crate::stdx::error::out_of_bound::OutOfBoundsError;
-
 /// Defines a bounded integer struct with const generic `MIN` and `MAX` bounds.
 ///
 /// # Examples
 ///
 /// ```rust
+/// # use crate::stdx::error::out_of_bound::OutOfBoundsError;
 /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// use catalyser::generate_bounded_num;
 /// use catalyser::stdx::error::out_of_bound::OutOfBoundsError;
