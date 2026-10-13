@@ -1,138 +1,87 @@
-//! This module provides a mechanism to define and work with numeric types that are bounded between
-//! a specified minimum and maximum value, both for integer and floating-point types. This ensures
-//! that invalid values outside the range are caught at runtime, providing additional safety and
-//! correctness in computations.
+//! Compile-time range-bounded integer and floating-point types.
 //!
-//! ## Features
+//! Provides the [`generate_bounded_num`](crate::generate_bounded_num) and
+//! [`generate_bounded_float`](crate::generate_bounded_float) macros along with
+//! predefined bounded integer types like [`BoundedI32`] and [`BoundedU8`].
 //!
-//! - **Integer Bounds:** Create bounded integer types with customizable ranges.
-//! - **Floating-point Bounds:** Define bounded floating-point types with predetermined ranges.
-//! - **Serialization:** Supports `serde` for (de)serializing the bounded numbers.
-//! - **Validation:** Provides utilities for creating bounded numbers and validating inputs at
-//!   runtime.
-//!
-//! ## Usage
-//!
-//! ### Generating Bounded Integer Types
-//!
-//! Use the `generate_bounded_num` macro to define a structured integer type bounded by specified
-//! minimum and maximum values.
+//! # Examples
 //!
 //! ```rust
-//! use serde::{de::Error, Deserialize, Serialize};
-//! use std::fmt::{Display, Formatter};
-//! use catalyser::stdx::{
-//!     error::out_of_bound::OutOfBoundsError,
-//!     primitive_number::BoundedI8
-//! };
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! use catalyser::stdx::primitive_number::BoundedI32;
 //!
-//! // Successfully create a bounded integer
-//! let value: BoundedI8<0, 100> = BoundedI8::new(42).unwrap();
-//! assert_eq!(value.into_inner(), 42);
+//! // Successfully construct a value within bounds [0, 100]
+//! let percentage = BoundedI32::<0, 100>::new(75)?;
+//! assert_eq!(percentage.into_inner(), 75);
 //!
-//! // Attempt to create a value outside the bounds
-//! let invalid_value = BoundedI8::<0, 100>::new(101);
-//! assert!(invalid_value.is_err());
+//! // Out-of-bounds inputs return an error
+//! let invalid = BoundedI32::<0, 100>::new(105);
+//! assert!(invalid.is_err());
+//! # Ok(())
+//! # }
 //! ```
-//!
-//! ### Generating Bounded Floating-Point Types
-//!
-//! Use the `generate_bounded_float` macro to create a floating-point type that is restricted to a
-//! specific range.
-//!
-//! ```rust
-//! use serde::{de::Error, Deserialize, Serialize};
-//! use std::fmt::{Display, Formatter};
-//! use catalyser::{
-//!     generate_bounded_float,
-//!     stdx::{
-//!         error::out_of_bound::OutOfBoundsError,
-//!         primitive_number::BoundedI8,
-//!     }
-//! };
-//!
-//! generate_bounded_float!(BoundedF32, 0.0, 100.0, f32);
-//!
-//! // Successfully create a bounded float
-//! let bounded_float = BoundedF32::new(75.5).unwrap();
-//! assert_eq!(bounded_float.into_inner(), 75.5);
-//!
-//! // Attempt to create a bounded float outside the range
-//! let invalid_float = BoundedF32::new(150.0);
-//! assert!(invalid_float.is_err());
-//! ```
-//!
-//! ## Customization
-//!
-//! The library allows you to easily expand the set of bounded numeric types by invoking the
-//! provided macros in your own codebase. Both integer and floating-point types are supported, and
-//! the bounds can be fully customized.
 
 use crate::stdx::error::out_of_bound::OutOfBoundsError;
-#[cfg(feature = "serde")]
-use serde::{
-    Deserialize,
-    Serialize,
-    de::Error,
-};
-use std::fmt::{
-    Display,
-    Formatter,
-};
 
+/// Defines a bounded integer struct with const generic `MIN` and `MAX` bounds.
+///
+/// # Examples
+///
+/// ```rust
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use catalyser::generate_bounded_num;
+/// use catalyser::stdx::error::out_of_bound::OutOfBoundsError;
+///
+/// generate_bounded_num!(MyByte, u8);
+///
+/// let byte = MyByte::<10, 20>::new(15)?;
+/// assert_eq!(byte.into_inner(), 15);
+/// # Ok(())
+/// # }
+/// ```
 #[macro_export]
 macro_rules! generate_bounded_num {
     ($name:ident, $type_name:ident) => {
-        #[doc = concat!("A [`", stringify!($name), "`](", stringify!($name), ")` that's bounded between two values (inclusive)")]
+        #[doc = concat!("A [`", stringify!($name), "`] bounded between `MIN` and `MAX` (inclusive).")]
         #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
         #[repr(transparent)]
-        #[cfg_attr(feature = "serde", derive(Serialize), serde(transparent))]
+        #[cfg_attr(
+            feature = "serde",
+            derive(serde::Serialize),
+            serde(transparent)
+        )]
         pub struct $name<const MIN: $type_name, const MAX: $type_name>($type_name);
 
         impl<const MIN: $type_name, const MAX: $type_name> $name<MIN, MAX> {
-            #[doc = concat!("Creates a new [`", stringify!($name), "`](Self) from `num`.\n")]
+            #[doc = concat!("Creates a new [`", stringify!($name), "`] from `num`.\n")]
             ///
-            /// # Parameters
+            /// # Errors
             ///
-            /// - `num` - The value to be validated and wrapped as a new bounded number.
-            ///
-            /// # Returns
-            ///
-            /// - `Ok(Self)` if `num` is within `MIN` and `MAX`.
-            /// - `Err(OutOfBoundsError)` if `num` is outside `MIN` and `MAX`.
+            /// - Returns [`OutOfBoundsError::Low`] if `num < MIN`.
+            /// - Returns [`OutOfBoundsError::High`] if `num > MAX`.
             #[allow(unused)]
-            pub fn new(num: $type_name) -> Result<Self, OutOfBoundsError<$type_name>> {
+            pub fn new(num: $type_name) -> Result<Self, $crate::stdx::error::out_of_bound::OutOfBoundsError<$type_name>> {
                 if MIN > num {
-                    Err(OutOfBoundsError::Low(MIN, MAX, num))
+                    Err($crate::stdx::error::out_of_bound::OutOfBoundsError::Low(MIN, MAX, num))
                 } else if num > MAX {
-                    Err(OutOfBoundsError::High(MIN, MAX, num))
+                    Err($crate::stdx::error::out_of_bound::OutOfBoundsError::High(MIN, MAX, num))
                 } else {
                     Ok(Self(num))
                 }
             }
 
-            #[doc = concat!("Create a new clamped [`", stringify!($name), "`] (unchecked). Assumes `num` is already clamped between `MIN` and `MAX` (inclusive).\n")]
-            ///
-            /// # Parameters
-            ///
-            /// - `num` - The value to be wrapped as a new bounded number. This must already be
-            ///   validated.
-            ///
-            /// # Returns
-            ///
-            /// - `Self` - A new instance of the bounded number wrapping the provided value.
+            #[doc = concat!("Creates a new [`", stringify!($name), "`] without bounds checking.\n")]
             ///
             /// # Safety
             ///
-            /// This function is marked unsafe because it assumes that `num` is already checked to
-            /// be within the range from `MIN` to `MAX` (inclusive). The caller must ensure that
-            /// this assumption is upheld.
+            /// The caller must guarantee that `num` is between `MIN` and `MAX`
+            /// (inclusive).
             #[allow(unused)]
             pub unsafe fn new_unchecked(num: $type_name) -> Self {
                 Self(num)
             }
 
-            /// Returns the value as a primitive type
+            /// Returns the inner primitive value.
             #[allow(unused)]
             pub fn into_inner(self) -> $type_name {
                 self.0
@@ -140,20 +89,19 @@ macro_rules! generate_bounded_num {
         }
 
         #[cfg(feature = "serde")]
-        impl<'de, const MIN: $type_name, const MAX: $type_name> Deserialize<'de> for $name<MIN, MAX> {
+        #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
+        impl<'de, const MIN: $type_name, const MAX: $type_name> serde::Deserialize<'de> for $name<MIN, MAX> {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: serde::Deserializer<'de>,
             {
-                match Deserialize::deserialize(deserializer).map(Self::new)? {
-                    Ok(result) => Ok(result),
-                    Err(err) => Err(D::Error::custom(err)),
-                }
+                let value = <$type_name as serde::Deserialize<'de>>::deserialize(deserializer)?;
+                Self::new(value).map_err(serde::de::Error::custom)
             }
         }
 
-        impl<const MIN: $type_name, const MAX: $type_name> Display for $name<MIN, MAX> {
-            fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        impl<const MIN: $type_name, const MAX: $type_name> ::core::fmt::Display for $name<MIN, MAX> {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                 self.0.fmt(f)
             }
         }
@@ -174,103 +122,73 @@ generate_bounded_num!(BoundedU64, u64);
 generate_bounded_num!(BoundedU128, u128);
 generate_bounded_num!(BoundedUsize, usize);
 
-/// A macro to generate a bounded float type with specified minimum and maximum values.
+/// A macro to generate a bounded floating-point type with fixed minimum and
+/// maximum values.
 ///
-/// This macro creates a type that represents a floating-point number bounded between
-/// specific minimum and maximum values. The type provides functionality to safely create
-/// an instance, validate its bounds, and perform serialization and deserialization.
-///
-/// # Example
+/// # Examples
 ///
 /// ```rust
-/// use serde::{de::Error, Deserialize, Serialize};
-/// use std::fmt::{Display, Formatter};
-/// use catalyser::{
-///     generate_bounded_float,
-///     stdx::{
-///         error::out_of_bound::OutOfBoundsError,
-///         primitive_number::BoundedI8,
-///     }
-/// };
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use catalyser::generate_bounded_float;
+/// use catalyser::stdx::error::out_of_bound::OutOfBoundsError;
 ///
 /// generate_bounded_float!(BoundedF32, 0.0, 100.0, f32);
 ///
-/// // Successfully create a bounded float within the range
-/// let bounded = BoundedF32::new(50.0).unwrap();
+/// let bounded = BoundedF32::new(50.0)?;
 /// assert_eq!(bounded.into_inner(), 50.0);
 ///
-/// // Attempt to create a bounded float outside the range
-/// let result = BoundedF32::new(150.0);
-/// assert!(result.is_err());
+/// assert!(BoundedF32::new(150.0).is_err());
+/// # Ok(())
+/// # }
 /// ```
-///
-/// # Parameters
-///
-/// - `$name`: The name of the generated bounded float type.
-/// - `$min`: The minimum value allowed for the type.
-/// - `$max`: The maximum value allowed for the type.
-/// - `$type_name`: The primitive floating-point type (e.g., `f32`, `f64`).
-///
-/// # Safety
-///
-/// The `new_unchecked` method assumes that the value provided is already clamped between
-/// the minimum and maximum values. If this is not guaranteed, it may lead to undefined behavior.
 #[macro_export]
 macro_rules! generate_bounded_float {
     ($name:ident, $min:expr, $max:expr, $type_name:ident) => {
-        #[doc = concat!("A [`", stringify!($name), "`](", stringify!($name), ")` that's bounded between two values (inclusive)")]
+        #[doc = concat!("A [`", stringify!($name), "`] bounded between `MIN` and `MAX` (inclusive).")]
         #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
         #[repr(transparent)]
-        #[cfg_attr(feature = "serde", derive(Serialize), serde(transparent))]
+        #[cfg_attr(
+            feature = "serde",
+            derive(serde::Serialize),
+            serde(transparent)
+        )]
         pub struct $name($type_name);
 
         impl $name {
+            /// The minimum permissible value.
             pub const MIN: $type_name = $min;
+            /// The maximum permissible value.
             pub const MAX: $type_name = $max;
 
-            #[doc = concat!("Creates a new [`", stringify!($name), "`](Self) from `num`.\n")]
+            #[doc = concat!("Creates a new [`", stringify!($name), "`] from `num`.\n")]
             ///
-            /// # Parameters
+            /// # Errors
             ///
-            /// - `num` - The value to be validated and wrapped as a new bounded number.
-            ///
-            /// # Returns
-            ///
-            /// - `Ok(Self)` if `num` is within `MIN` and `MAX`.
-            /// - `Err(OutOfBoundsError)` if `num` is outside `MIN` and `MAX`.
+            /// - Returns [`OutOfBoundsError::Low`] if `num < Self::MIN`.
+            /// - Returns [`OutOfBoundsError::High`] if `num > Self::MAX`.
             #[allow(unused)]
-            pub fn new(num: $type_name) -> Result<Self, OutOfBoundsError<$type_name>> {
+            pub fn new(num: $type_name) -> Result<Self, $crate::stdx::error::out_of_bound::OutOfBoundsError<$type_name>> {
                 if Self::MIN > num {
-                    Err(OutOfBoundsError::Low(Self::MIN, Self::MAX, num))
+                    Err($crate::stdx::error::out_of_bound::OutOfBoundsError::Low(Self::MIN, Self::MAX, num))
                 } else if num > Self::MAX {
-                    Err(OutOfBoundsError::High(Self::MIN, Self::MAX, num))
+                    Err($crate::stdx::error::out_of_bound::OutOfBoundsError::High(Self::MIN, Self::MAX, num))
                 } else {
                     Ok(Self(num))
                 }
             }
 
-            #[doc = concat!("Create a new clamped [`", stringify!($name), "`] (unchecked). Assumes `num` is already clamped between `MIN` and `MAX` (inclusive).\n")]
-            ///
-            /// # Parameters
-            ///
-            /// - `num` - The value to be wrapped as a new bounded number. This must already be
-            ///   validated.
-            ///
-            /// # Returns
-            ///
-            /// - `Self` - A new instance of the bounded number wrapping the provided value.
+            #[doc = concat!("Creates a new [`", stringify!($name), "`] without bounds checking.\n")]
             ///
             /// # Safety
             ///
-            /// This function is marked unsafe because it assumes that `num` is already checked to
-            /// be within the range from `MIN` to `MAX` (inclusive). The caller must ensure that
-            /// this assumption is upheld.
+            /// The caller must guarantee that `num` is between `Self::MIN` and
+            /// `Self::MAX` (inclusive).
             #[allow(unused)]
             pub unsafe fn new_unchecked(num: $type_name) -> Self {
                 Self(num)
             }
 
-            /// Returns the value as a primitive type
+            /// Returns the inner primitive float value.
             #[allow(unused)]
             pub fn into_inner(self) -> $type_name {
                 self.0
@@ -278,18 +196,19 @@ macro_rules! generate_bounded_float {
         }
 
         #[cfg(feature = "serde")]
+        #[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
         impl<'de> serde::Deserialize<'de> for $name {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
                 D: serde::Deserializer<'de>,
             {
-                let value = $type_name::deserialize(deserializer)?;
-                $name::new(value).map_err(D::Error::custom)
+                let value = <$type_name as serde::Deserialize<'de>>::deserialize(deserializer)?;
+                Self::new(value).map_err(serde::de::Error::custom)
             }
         }
 
-        impl Display for $name {
-            fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        impl ::core::fmt::Display for $name {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                 self.0.fmt(f)
             }
         }

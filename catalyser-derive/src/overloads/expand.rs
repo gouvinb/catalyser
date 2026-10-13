@@ -1,29 +1,38 @@
 //! Code generation for `#[overloads]`.
 //!
 //! For a function `add(a: i32, #[default(10)] b: i32) -> i32`, the macro emits:
+//!
 //! 1. `struct AddArgs { pub b: i32 }`
-//! 2. `impl Default for AddArgs { fn default() -> Self { let b = 10; Self { b } } }`
+//! 2. `impl Default for AddArgs` (evaluates `b = 10` in `default()`)
 //! 3. `pub fn add(a: i32, b: i32) -> i32 { a + b }`
 //! 4. `pub fn add_overload(a: i32, args: AddArgs) -> i32 { add(a, args.b) }`
-//! 5. `pub fn add_default(a: i32) -> i32 { add_overload(a, AddArgs::default()) }`
+//! 5. `pub fn add_default(a: i32) -> i32` (calls `add_overload` with defaults)
 //!
 //! For an `impl` block:
-//! ```ignore
+//!
+//! ```rust
 //! #[overloads]
 //! impl Sub {
-//!     pub fn new(a: i32, #[default(10)] b: i32) -> Self { Sub { a, b } }
+//!     pub fn new(a: i32, #[default(10)] b: i32) -> Self {
+//!         Sub { a, b }
+//!     }
 //! }
 //! ```
-//! The macro emits `SubNewArgs` struct outside `impl Sub`, and `new`, `new_overload`, `new_default` inside `impl Sub`.
+//!
+//! The macro emits `SubNewArgs` struct outside `impl Sub`, and `new`,
+//! `new_overload`, `new_default` inside `impl Sub`.
 //!
 //! For a `trait`:
-//! ```ignore
+//!
+//! ```rust
 //! #[overloads]
 //! pub trait Mod {
 //!     fn modulo(&self, a: i32, #[default(10)] b: i32) -> i32;
 //! }
 //! ```
-//! The macro emits `ModModuloArgs` struct outside `trait Mod`, and `modulo`, `modulo_overload`, `modulo_default` inside `trait Mod`.
+//!
+//! The macro emits `ModModuloArgs` struct outside `trait Mod`, and `modulo`,
+//! `modulo_overload`, `modulo_default` inside `trait Mod`.
 
 use crate::overloads::parse::{
     OverloadsFn,
@@ -326,12 +335,12 @@ fn expand_method(
 
     let default_bindings: Vec<_> = defaulted_params
         .iter()
-        .map(|p| {
+        .filter_map(|p| {
             let ident = &p.ident;
-            let default_expr = p.default.as_ref().unwrap();
-            quote! {
+            let default_expr = p.default.as_ref()?;
+            Some(quote! {
                 let #ident = #default_expr;
-            }
+            })
         })
         .collect();
     let default_fields: Vec<_> = defaulted_params.iter().map(|p| &p.ident).collect();

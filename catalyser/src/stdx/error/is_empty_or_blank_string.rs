@@ -1,21 +1,36 @@
-//! This module contains an enumeration `StringContentError` for representing possible errors
-//! related to validation of string content. This includes checks for empty strings or strings that
-//! consist only of blank spaces.
+//! String content validation error types.
 //!
-//! The module also provides implementations of the `Debug` and `Display` traits for
-//! `StringContentError`, enabling error representation in different formats.
+//! Provides [`StringContentError`] for handling empty or blank string
+//! validation errors.
 
-use std::fmt::{
-    Debug,
-    Display,
-    Formatter,
+use std::{
+    error::Error,
+    fmt::{
+        Debug,
+        Display,
+        Formatter,
+    },
 };
 
-/// Represents possible errors related to string content validation.
+/// Represents errors encountered during string content validation.
+///
+/// # Examples
+///
+/// ```rust
+/// use catalyser::stdx::error::is_empty_or_blank_string::StringContentError;
+///
+/// let empty_err = StringContentError::Empty;
+/// assert_eq!(empty_err.to_string(), "string is empty");
+///
+/// let blank_err = StringContentError::Blank("   ".to_string());
+/// assert_eq!(blank_err.to_string(), "string is blank (content: `   `)");
+/// ```
+#[derive(Clone, PartialEq, Eq)]
 pub enum StringContentError {
-    /// Indicates the string is empty.
+    /// Indicates that the validated string is completely empty.
     Empty,
-    /// Indicates the string contains only blank spaces. Includes the original string.
+    /// Indicates that the validated string contains only whitespace
+    /// characters.
     Blank(String),
 }
 
@@ -30,13 +45,11 @@ impl Debug for StringContentError {
 
 impl Display for StringContentError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                StringContentError::Empty => "string is empty".to_string(),
-                StringContentError::Blank(value) => format!("string is blank (content: `{}`)", value),
-            }
-        )
+        match self {
+            StringContentError::Empty => write!(f, "string is empty"),
+            StringContentError::Blank(value) => write!(f, "string is blank (content: `{value}`)"),
+        }
     }
 }
+
+impl Error for StringContentError {}

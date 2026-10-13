@@ -1,25 +1,59 @@
-/// An interface for removing the margin of multi-line string. (Kotlin string
-/// inspiration)
+//! Utilities for multiline string trimming and margin alignment.
+//!
+//! Provides the [`MultilineStr`] extension trait for cleaning up multiline
+//! string literals.
+
+/// An extension trait for stripping margins and aligning multiline strings.
+///
+/// Inspired by Kotlin's `String.trimMargin()`.
+///
+/// # Examples
+///
+/// ```rust
+/// use catalyser::stdx::extension::str_extension::MultilineStr;
+///
+/// let message = "
+///     |Hello,
+///     |world!
+/// ".trim_margin();
+/// assert_eq!(message, "Hello,\nworld!");
+/// ```
 pub trait MultilineStr {
-    /// Removes the margin from each line of the string, where the margin is
-    /// determined by the given `margin_prefix`.
+    /// Strips leading whitespace and the specified `margin_prefix` from each
+    /// line.
     ///
     /// # Parameters
     ///
-    /// * `margin_prefix` - The prefix that marks the start of the margin to be
-    ///   trimmed.
+    /// - `margin_prefix`: The prefix that marks the boundary of the margin to
+    ///   be trimmed.
     ///
-    /// # Returns
+    /// # Examples
     ///
-    /// A new `String` with the margin removed from each line.
+    /// ```rust
+    /// use catalyser::stdx::extension::str_extension::MultilineStr;
+    ///
+    /// let text = "
+    ///     #First line
+    ///     #Second line
+    /// ".trim_margin_with("#");
+    /// assert_eq!(text, "First line\nSecond line");
+    /// ```
     fn trim_margin_with<M: AsRef<str>>(&self, margin_prefix: M) -> String;
 
-    /// Removes the margin from each line of the string, using "|" as the
-    /// default margin prefix.
+    /// Strips leading whitespace and the default margin prefix (`"|"`) from
+    /// each line.
     ///
-    /// # Returns
+    /// # Examples
     ///
-    /// A new `String` with the margin removed from each line.
+    /// ```rust
+    /// use catalyser::stdx::extension::str_extension::MultilineStr;
+    ///
+    /// let text = "
+    ///     |Line 1
+    ///     |Line 2
+    /// ".trim_margin();
+    /// assert_eq!(text, "Line 1\nLine 2");
+    /// ```
     fn trim_margin(&self) -> String {
         self.trim_margin_with("|")
     }
