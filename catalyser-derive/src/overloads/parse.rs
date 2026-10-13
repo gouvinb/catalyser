@@ -1,11 +1,12 @@
-//! Model of functions, impl blocks, and traits whose parameters may carry `#[default(expr)]`.
+//! Model of functions, impl blocks, and traits whose parameters may carry
+//! `#[default(expr)]`.
 //!
-//! `fn f(a: u8, #[default(5)] b: u8)` is syntactically valid Rust, so we can parse a
-//! plain `syn::ItemFn`, `syn::ItemImpl`, or `syn::ItemTrait` and then extract the `#[default(..)]`
-//! attributes from the parameters.
+//! `fn f(a: u8, #[default(5)] b: u8)` is syntactically valid Rust, so we can
+//! parse a plain `syn::ItemFn`, `syn::ItemImpl`, or `syn::ItemTrait` and then
+//! extract the `#[default(..)]` attributes from the parameters.
 //!
-//! Parameters with a default must form a suffix of the parameter list: a parameter
-//! without a default cannot follow one that has a default.
+//! Parameters with a default must form a suffix of the parameter list: a
+//! parameter without a default cannot follow one that has a default.
 
 use proc_macro2::TokenTree;
 use quote::ToTokens;

@@ -1,11 +1,15 @@
-//! `extension` module provides utilities and extensions for working with Rust's standard
-//! library.
+//! Scope functions and string extension traits.
 //!
 //! # Submodules
 //!
-//! - `scope_functions_extension`: Contains utilities for working with scope functions like closures
-//!   and higher-order functions.
-//! - `str_extension`: Contains additional utilities for string manipulation.
+//! - [`scope_functions_extension`]: Scope functions
+//!   ([`Apply`](scope_functions_extension::Apply),
+//!   [`Run`](scope_functions_extension::Run),
+//!   [`TakeIf`](scope_functions_extension::TakeIf),
+//!   [`TakeUnless`](scope_functions_extension::TakeUnless),
+//!   [`repeat`](scope_functions_extension::repeat)).
+//! - [`str_extension`]: Multiline string manipulation
+//!   ([`MultilineStr`](str_extension::MultilineStr)).
 
 pub mod scope_functions_extension;
 pub mod str_extension;

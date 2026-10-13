@@ -1,30 +1,24 @@
-//! This module defines a generic wrapper, `NonEmptyCollection`, to ensure that collections are
-//! non-empty. It provides implementations for commonly used Rust collections, such as `HashSet`,
-//! `Vec`, `VecDeque`, `BTreeMap`, and others, and verifies their non-empty nature at runtime.
+//! Non-empty collection wrappers ensuring non-empty guarantees at runtime.
 //!
-//! The module also includes utility methods, serialization and deserialization support via Serde,
-//! and specialized types for specific non-empty collections.
+//! Provides [`NonEmptyCollection`] and specialized type aliases for common
+//! standard library collections such as [`NonEmptyVec`], [`NonEmptyHashSet`],
+//! and [`NonEmptyBTreeMap`].
 //!
-//! # Features
-//!
-//! - `NonEmptyCollection` ensures collections are not empty when constructed.
-//! - Supports several collection types (e.g., `Vec`, `BTreeSet`, `HashSet`).
-//! - Seamless handling of serialization and deserialization using Serde.
-//! - Provides unchecked creation for use cases where the non-empty constraint is guaranteed by
-//!   logic.
-//!
-//! # Usage Example
+//! # Examples
 //!
 //! ```rust
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
 //! use catalyser::stdx::collections::NonEmptyVec;
 //!
 //! let data = vec![1, 2, 3];
-//! let non_empty_vec = NonEmptyVec::new(data).unwrap();
+//! let non_empty_vec = NonEmptyVec::new(data)?;
 //! assert_eq!(non_empty_vec.into_inner(), vec![1, 2, 3]);
 //!
 //! let empty_data: Vec<i32> = vec![];
 //! let result = NonEmptyVec::new(empty_data);
 //! assert!(result.is_err());
+//! # Ok(())
+//! # }
 //! ```
 
 use crate::stdx::error::is_empty_sequence::SequenceContentError;
@@ -43,7 +37,21 @@ use std::collections::{
     VecDeque,
 };
 
-/// A generic non-empty collection wrapper.
+/// A generic wrapper ensuring that the underlying collection `C` contains at
+/// least one element.
+///
+/// # Examples
+///
+/// ```rust
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use catalyser::stdx::collections::NonEmptyCollection;
+///
+/// let numbers: NonEmptyCollection<i32, Vec<i32>> =
+///     NonEmptyCollection::new(vec![10, 20])?;
+/// assert_eq!(numbers.into_inner(), vec![10, 20]);
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
@@ -57,16 +65,27 @@ where
     C: IntoIterator<Item = T> + Default,
     C: FromIterator<T> + Clone,
 {
-    /// Creates a new non-empty collection.
+    /// Creates a new [`NonEmptyCollection`] if `collection` has at least one
+    /// element.
     ///
-    /// # Parameters
+    /// # Errors
     ///
-    /// - `collection`: The input collection.
+    /// Returns [`SequenceContentError::Empty`] if `collection` is empty.
     ///
-    /// # Returns
+    /// # Examples
     ///
-    /// - `Ok(Self)` if the collection is non-empty.
-    /// - `Err(SequenceContentError::Empty)` if the collection is empty.
+    /// ```rust
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use catalyser::stdx::collections::NonEmptyVec;
+    ///
+    /// let vec = NonEmptyVec::new(vec![1, 2, 3])?;
+    /// assert_eq!(vec.into_inner(), vec![1, 2, 3]);
+    ///
+    /// let empty: Vec<i32> = vec![];
+    /// assert!(NonEmptyVec::new(empty).is_err());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn new(collection: C) -> Result<Self, SequenceContentError> {
         if collection.clone().into_iter().next().is_none() {
             Err(SequenceContentError::Empty)
@@ -75,30 +94,47 @@ where
         }
     }
 
-    /// Creates a new non-empty collection.
-    ///
-    /// # Parameters
-    ///
-    /// - `collection`: The input collection.
-    ///
-    /// # Returns
-    ///
-    /// - `Self`: A new non-empty collection.
+    /// Creates a [`NonEmptyCollection`] without verifying that `collection` is
+    /// non-empty.
     ///
     /// # Safety
     ///
-    /// This function assumes that the collection is non-empty.
+    /// The caller must ensure that `collection` contains at least one element.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use catalyser::stdx::collections::NonEmptyVec;
+    ///
+    /// let vec = unsafe {
+    ///     NonEmptyVec::new_unchecked(vec![1, 2, 3])
+    /// };
+    /// assert_eq!(vec.into_inner(), vec![1, 2, 3]);
+    /// ```
     pub unsafe fn new_unchecked(collection: C) -> Self {
         Self(collection)
     }
 
-    /// Returns the inner collection.
+    /// Consumes the wrapper and returns the underlying collection.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use catalyser::stdx::collections::NonEmptyVec;
+    ///
+    /// let vec = NonEmptyVec::new(vec!["a", "b"])?;
+    /// assert_eq!(vec.into_inner(), vec!["a", "b"]);
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn into_inner(self) -> C {
         self.0
     }
 }
 
 #[cfg(feature = "serde")]
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 impl<'de, T, C> Deserialize<'de> for NonEmptyCollection<T, C>
 where
     T: Deserialize<'de>,
@@ -115,25 +151,121 @@ where
     }
 }
 
-/// Specialized type for non-empty ordered set based on a B-Tree.
+/// A non-empty [`BTreeSet`].
+///
+/// # Examples
+///
+/// ```rust
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use catalyser::stdx::collections::NonEmptyBTreeSet;
+/// use std::collections::BTreeSet;
+///
+/// let set: BTreeSet<i32> = [1, 2, 3].into_iter().collect();
+/// let non_empty = NonEmptyBTreeSet::new(set)?;
+/// assert_eq!(non_empty.into_inner().len(), 3);
+/// # Ok(())
+/// # }
+/// ```
 pub type NonEmptyBTreeSet<T> = NonEmptyCollection<T, BTreeSet<T>>;
 
-/// Specialized type for non-empty hash sets.
+/// A non-empty [`HashSet`].
+///
+/// # Examples
+///
+/// ```rust
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use catalyser::stdx::collections::NonEmptyHashSet;
+/// use std::collections::HashSet;
+///
+/// let set: HashSet<i32> = [1, 2, 3].into_iter().collect();
+/// let non_empty = NonEmptyHashSet::new(set)?;
+/// assert_eq!(non_empty.into_inner().len(), 3);
+/// # Ok(())
+/// # }
+/// ```
 pub type NonEmptyHashSet<T> = NonEmptyCollection<T, HashSet<T>>;
 
-/// Specialized type for non-empty vectors.
+/// A non-empty [`Vec`].
+///
+/// # Examples
+///
+/// ```rust
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use catalyser::stdx::collections::NonEmptyVec;
+///
+/// let non_empty = NonEmptyVec::new(vec![10, 20])?;
+/// assert_eq!(non_empty.into_inner(), vec![10, 20]);
+/// # Ok(())
+/// # }
+/// ```
 pub type NonEmptyVec<T> = NonEmptyCollection<T, Vec<T>>;
 
-/// Specialized type for non-empty double-ended queue.
+/// A non-empty [`VecDeque`].
+///
+/// # Examples
+///
+/// ```rust
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use catalyser::stdx::collections::NonEmptyVecDeque;
+/// use std::collections::VecDeque;
+///
+/// let deque: VecDeque<i32> = [1, 2].into_iter().collect();
+/// let non_empty = NonEmptyVecDeque::new(deque)?;
+/// assert_eq!(non_empty.into_inner().len(), 2);
+/// # Ok(())
+/// # }
+/// ```
 pub type NonEmptyVecDeque<T> = NonEmptyCollection<T, VecDeque<T>>;
 
-/// Specialized type for non-empty doubly-linked list with owned nodes.
+/// A non-empty [`LinkedList`].
+///
+/// # Examples
+///
+/// ```rust
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use catalyser::stdx::collections::NonEmptyLinkedList;
+/// use std::collections::LinkedList;
+///
+/// let list: LinkedList<i32> = [1, 2].into_iter().collect();
+/// let non_empty = NonEmptyLinkedList::new(list)?;
+/// assert_eq!(non_empty.into_inner().len(), 2);
+/// # Ok(())
+/// # }
+/// ```
 pub type NonEmptyLinkedList<T> = NonEmptyCollection<T, LinkedList<T>>;
 
-/// Specialized type for non-empty sorted B-tree map.
+/// A non-empty [`BTreeMap`].
+///
+/// # Examples
+///
+/// ```rust
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use catalyser::stdx::collections::NonEmptyBTreeMap;
+/// use std::collections::BTreeMap;
+///
+/// let map = BTreeMap::from([("key", 42)]);
+/// let non_empty = NonEmptyBTreeMap::new(map)?;
+/// assert_eq!(non_empty.into_inner().get("key"), Some(&42));
+/// # Ok(())
+/// # }
+/// ```
 pub type NonEmptyBTreeMap<K, V> = NonEmptyCollection<(K, V), BTreeMap<K, V>>;
 
-/// Specialized type for non-empty hash map.
+/// A non-empty [`HashMap`].
+///
+/// # Examples
+///
+/// ```rust
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use catalyser::stdx::collections::NonEmptyHashMap;
+/// use std::collections::HashMap;
+///
+/// let map = HashMap::from([("key", 42)]);
+/// let non_empty = NonEmptyHashMap::new(map)?;
+/// assert_eq!(non_empty.into_inner().get("key"), Some(&42));
+/// # Ok(())
+/// # }
+/// ```
 pub type NonEmptyHashMap<K, V> = NonEmptyCollection<(K, V), HashMap<K, V>>;
 
 #[cfg(test)]

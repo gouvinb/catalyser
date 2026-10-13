@@ -1,57 +1,26 @@
-//! This module provides functionality for working with validated strings in a type-safe manner,
-//! ensuring that strings adhere to specific content rules during their creation and use.
+//! Type-safe validated string wrappers ensuring content rules at runtime.
 //!
-//! The primary types and traits included in this module are:
+//! Provides [`ValidatedString`] alongside pre-configured aliases
+//! [`NonEmptyString`] and [`NonBlankString`].
 //!
-//! - [StringContentValidator]: A trait for defining validation rules that strings must satisfy
-//!   to be considered valid. Implementations of this trait specify the validation logic.
-//! - [ValidatedString]: A wrapper around [String] that ensures its content complies with the rules
-//!   defined by a [StringContentValidator]. This guarantees that all instances of [ValidatedString]
-//!   are known to be valid according to the associated rules.
-//!
-//! # Features
-//!
-//! - **Type-Safe String Validation**: By using generics and the [ValidatedString] type, this module
-//!   statically enforces that string content is valid according to the specified validation rules.
-//!
-//! - **Custom Validators**: You can implement the [StringContentValidator] trait to define custom
-//!   validation logic for specific use cases.
-//!
-//! - **Serialization and Deserialization**: [ValidatedString] supports `serde` serialization and
-//!   deserialization, ensuring that validated strings remain valid through these operations.
-//!
-//! # Example Types
-//!
-//! - [NonEmptyString]: A type alias for [ValidatedString] that uses the [NonEmptyValidator] to
-//!   enforce non-empty content.
-//! - [NonBlankString]: A type alias for [ValidatedString] that uses the [NonBlankValidator] to
-//!   enforce non-blank (non-whitespace) content.
-//!
-//! ## Examples
+//! # Examples
 //!
 //! ```rust
-//! use catalyser::stdx::string::{NonEmptyString, NonBlankString};
+//! # fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! use catalyser::stdx::string::{NonBlankString, NonEmptyString};
 //!
-//! // Using NonEmptyString
-//! let valid_non_empty = NonEmptyString::new("Hello".to_string());
-//! assert!(valid_non_empty.is_ok());
+//! // Non-empty string validation
+//! let valid_non_empty = NonEmptyString::new("Hello".to_string())?;
+//! assert_eq!(valid_non_empty.into_inner(), "Hello");
+//! assert!(NonEmptyString::new("".to_string()).is_err());
 //!
-//! let invalid_non_empty = NonEmptyString::new("".to_string());
-//! assert!(invalid_non_empty.is_err());
-//!
-//! // Using NonBlankString
-//! let valid_non_blank = NonBlankString::new("  Hello  ".to_string());
-//! assert!(valid_non_blank.is_ok());
-//!
-//! let invalid_non_blank = NonBlankString::new("   ".to_string());
-//! assert!(invalid_non_blank.is_err());
+//! // Non-blank string validation (rejects whitespace-only strings)
+//! let valid_non_blank = NonBlankString::new("  Hello  ".to_string())?;
+//! assert_eq!(valid_non_blank.into_inner(), "  Hello  ");
+//! assert!(NonBlankString::new("   \t\n ".to_string()).is_err());
+//! # Ok(())
+//! # }
 //! ```
-//!
-//! # Safety
-//!
-//! Be cautious with the `new_unchecked` method provided by `ValidatedString`, as it allows creating
-//! instances without validation. Only use this method when you are certain the input complies with
-//! the expected validation rules.
 
 use crate::stdx::error::is_empty_or_blank_string::StringContentError;
 #[cfg(feature = "serde")]
@@ -69,30 +38,44 @@ use std::{
     marker::PhantomData,
 };
 
-/// A trait for validating and creating `ValidatedString` instances with specific content rules.
+/// A trait for validating and creating [`ValidatedString`] instances.
 ///
-/// This trait is implemented by types that define rules for string content validation. The
-/// `validate_and_create` method is used to create a `ValidatedString` if the provided input
-/// meets the criteria defined in the implementor.
+/// Implementors define custom validation rules for string contents.
+///
+/// # Examples
+///
+/// ```rust
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use catalyser::stdx::string::{NonEmptyValidator, StringContentValidator};
+///
+/// let validated =
+///     NonEmptyValidator::validate_and_create("Ferris".to_string())?;
+/// assert_eq!(validated.into_inner(), "Ferris");
+/// # Ok(())
+/// # }
+/// ```
 pub trait StringContentValidator: Sized {
-    /// Validates and creates a `ValidatedString` instance if the input satisfies the content rules.
+    /// Validates the input string and creates a [`ValidatedString`] if valid.
     ///
-    /// # Parameters
+    /// # Errors
     ///
-    /// - `input`: The input string to validate.
-    ///
-    /// # Returns
-    ///
-    /// - `Ok(ValidatedString<Self>)`: If the input meets the validation criteria.
-    /// - `Err(StringContentError)`: If the input fails validation, indicating the error type.
+    /// Returns [`StringContentError`] if the input fails the validation rules.
     fn validate_and_create(input: String) -> Result<ValidatedString<Self>, StringContentError>;
 }
 
-/// A wrapper around `String` that ensures its content adheres to the rules
-/// defined by the `StringContentValidator` trait.
+/// A wrapper around [`String`] that enforces validation rules defined by `T`.
 ///
-/// `ValidatedString` uses the generic type parameter `T` to specify the validator
-/// to apply for content validation.
+/// # Examples
+///
+/// ```rust
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use catalyser::stdx::string::NonEmptyString;
+///
+/// let greeting = NonEmptyString::new("Hello, Rustacean!".to_string())?;
+/// assert_eq!(greeting.into_inner(), "Hello, Rustacean!");
+/// # Ok(())
+/// # }
+/// ```
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
 #[cfg_attr(feature = "serde", derive(Serialize))]
@@ -100,35 +83,61 @@ pub trait StringContentValidator: Sized {
 pub struct ValidatedString<T: StringContentValidator>(String, PhantomData<T>);
 
 impl<T: StringContentValidator> ValidatedString<T> {
-    /// Creates a new `ValidatedString` by validating the provided input string.
+    /// Validates and wraps `string` into a [`ValidatedString`].
     ///
-    /// # Parameters
+    /// # Errors
     ///
-    /// - `string`: The input string to validate and wrap.
+    /// Returns [`StringContentError`] if `string` fails validation.
     ///
-    /// # Returns
+    /// # Examples
     ///
-    /// - `Ok(Self)`: If the input string passes validation.
-    /// - `Err(StringContentError)`: If the input string fails validation with the appropriate error.
+    /// ```rust
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use catalyser::stdx::string::NonEmptyString;
+    ///
+    /// let valid = NonEmptyString::new("Valid content".to_string())?;
+    /// assert_eq!(valid.into_inner(), "Valid content");
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn new(string: String) -> Result<Self, StringContentError> {
         T::validate_and_create(string)
     }
 
-    /// Creates a new `ValidatedString` without performing any validation.
-    ///
-    /// # Parameters
-    ///
-    /// - `string`: The input string to wrap.
+    /// Creates a [`ValidatedString`] without validating its content.
     ///
     /// # Safety
     ///
-    /// This method is unsafe because it assumes the caller has ensured the input is valid without
-    /// verification.
+    /// The caller must ensure that `string` satisfies the validation
+    /// invariants for `T`.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use catalyser::stdx::string::NonEmptyString;
+    ///
+    /// let valid = unsafe {
+    ///     NonEmptyString::new_unchecked("Known non-empty".to_string())
+    /// };
+    /// assert_eq!(valid.into_inner(), "Known non-empty");
+    /// ```
     pub unsafe fn new_unchecked(string: String) -> Self {
         Self(string, PhantomData)
     }
 
-    /// Consumes the `ValidatedString` and returns the inner `String`.
+    /// Consumes the wrapper and returns the underlying [`String`].
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// use catalyser::stdx::string::NonEmptyString;
+    ///
+    /// let valid = NonEmptyString::new("Rust".to_string())?;
+    /// assert_eq!(valid.into_inner(), "Rust");
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn into_inner(self) -> String {
         self.0
     }
@@ -141,6 +150,7 @@ impl<T: StringContentValidator> Display for ValidatedString<T> {
 }
 
 #[cfg(feature = "serde")]
+#[cfg_attr(docsrs, doc(cfg(feature = "serde")))]
 impl<'de, T: StringContentValidator> Deserialize<'de> for ValidatedString<T> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -151,20 +161,29 @@ impl<'de, T: StringContentValidator> Deserialize<'de> for ValidatedString<T> {
     }
 }
 
-/// Validator that ensures a string is not empty.
+/// A validator that requires strings to be non-empty (length > 0).
+///
+/// # Examples
+///
+/// ```rust
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use catalyser::stdx::string::{NonEmptyValidator, StringContentValidator};
+///
+/// assert!(
+///     NonEmptyValidator::validate_and_create("hello".to_string()).is_ok()
+/// );
+/// assert!(NonEmptyValidator::validate_and_create("".to_string()).is_err());
+/// # Ok(())
+/// # }
+/// ```
 pub struct NonEmptyValidator;
 
 impl StringContentValidator for NonEmptyValidator {
-    /// Validates that the input string is not empty.
+    /// Validates that `input` is not empty.
     ///
-    /// # Parameters
+    /// # Errors
     ///
-    /// - `input`: The input string to validate.
-    ///
-    /// # Returns
-    ///
-    /// - `Ok(ValidatedString<Self>)` if the input is not empty.
-    /// - `Err(StringContentError::Empty)` if the input is empty.
+    /// Returns [`StringContentError::Empty`] if `input.is_empty()`.
     fn validate_and_create(input: String) -> Result<ValidatedString<Self>, StringContentError> {
         if input.is_empty() {
             return Err(StringContentError::Empty);
@@ -173,55 +192,70 @@ impl StringContentValidator for NonEmptyValidator {
     }
 }
 
-/// Validator that ensures a string is not blank (not just whitespace).
+/// A validator that requires strings to contain at least one non-whitespace
+/// character.
+///
+/// # Examples
+///
+/// ```rust
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+/// use catalyser::stdx::string::{NonBlankValidator, StringContentValidator};
+///
+/// assert!(
+///     NonBlankValidator::validate_and_create("hello".to_string()).is_ok()
+/// );
+/// assert!(NonBlankValidator::validate_and_create("   ".to_string()).is_err());
+/// # Ok(())
+/// # }
+/// ```
 pub struct NonBlankValidator;
 
 impl StringContentValidator for NonBlankValidator {
-    /// Validates that the input string is not blank.
+    /// Validates that `input` contains at least one non-whitespace character.
     ///
-    /// # Parameters
+    /// # Errors
     ///
-    /// - `input`: The input string to validate.
-    ///
-    /// # Returns
-    ///
-    /// - `Ok(ValidatedString<Self>)` if the input is not blank.
-    /// - `Err(StringContentError::Blank)` if the input contains only whitespace.
+    /// Returns [`StringContentError::Blank`] if `input.trim().is_empty()`.
     fn validate_and_create(input: String) -> Result<ValidatedString<Self>, StringContentError> {
         if input.trim().is_empty() {
-            return Err(StringContentError::Blank(input.to_string()));
+            return Err(StringContentError::Blank(input));
         }
         Ok(ValidatedString(input, PhantomData))
     }
 }
 
-/// A `ValidatedString` that ensures the content is non-empty.
+/// A [`ValidatedString`] that is guaranteed to be non-empty.
 ///
 /// # Examples
 ///
-/// ```
+/// ```rust
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// use catalyser::stdx::string::NonEmptyString;
 ///
-/// let valid = NonEmptyString::new("Hello".to_string());
-/// assert!(valid.is_ok());
+/// let valid = NonEmptyString::new("Hello".to_string())?;
+/// assert_eq!(valid.into_inner(), "Hello");
 ///
-/// let empty = NonEmptyString::new("".to_string());
-/// assert!(empty.is_err());
+/// assert!(NonEmptyString::new("".to_string()).is_err());
+/// # Ok(())
+/// # }
 /// ```
 pub type NonEmptyString = ValidatedString<NonEmptyValidator>;
 
-/// A `ValidatedString` that ensures the content is non-blank.
+/// A [`ValidatedString`] that is guaranteed to contain at least one
+/// non-whitespace character.
 ///
 /// # Examples
 ///
-/// ```
+/// ```rust
+/// # fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// use catalyser::stdx::string::NonBlankString;
 ///
-/// let valid = NonBlankString::new("Hello".to_string());
-/// assert!(valid.is_ok());
+/// let valid = NonBlankString::new("  Hello  ".to_string())?;
+/// assert_eq!(valid.into_inner(), "  Hello  ");
 ///
-/// let blank = NonBlankString::new(" \t\n".to_string());
-/// assert!(blank.is_err());
+/// assert!(NonBlankString::new(" \t\n ".to_string()).is_err());
+/// # Ok(())
+/// # }
 /// ```
 pub type NonBlankString = ValidatedString<NonBlankValidator>;
 

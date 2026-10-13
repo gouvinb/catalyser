@@ -1,6 +1,6 @@
 [package]
 name = "catalyser"
-description = "A comprehensive collection of extensions to simplify and enhane rust development."
+description = "A comprehensive collection of extensions to simplify and enhance rust development."
 version = "0.1.1"
 keywords = [
     "utils",
@@ -14,6 +14,9 @@ license.workspace = true
 readme.workspace = true
 repository.workspace = true
 
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 catalyser-derive = { workspace = true, optional = true }
@@ -24,9 +27,6 @@ serde_json.workspace = true
 
 [features]
 default = []
-
-# Provide `catalyser` unstable functionality.
-#unstable = []
 
 # Provide derive macros.
 derive = ["dep:catalyser-derive"]

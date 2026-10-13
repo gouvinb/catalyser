@@ -1,6 +1,6 @@
 [package]
 name = "catalyser-derive"
-description = "A comprehensive collection of derive to simplify and enhane rust development."
+description = "A comprehensive collection of derive macros to simplify and enhance rust development."
 version = "0.1.0"
 keywords = [
     "utils",
@@ -13,11 +13,15 @@ license.workspace = true
 readme.workspace = true
 repository.workspace = true
 
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
 [lib]
 proc-macro = true
 
 [dependencies]
-proc-macro2 = {workspace = true }
+proc-macro2 = { workspace = true }
 quote = { workspace = true }
 syn = { workspace = true, features = ["full"] }
 
@@ -27,17 +31,3 @@ trybuild = { workspace = true }
 
 [features]
 default = []
-
-# Provide `catalyser` unstable functionality.
-#unstable = []
-
-# Provide derive macros.
-#derive = []
-
-# Provide `catalyser` for common standard library.
-# Requires a dependency on the Rust standard library.
-#std = []
-
-# Provide `catalyser` for serde library.
-# Requires a serde dependency.
-#serde = []

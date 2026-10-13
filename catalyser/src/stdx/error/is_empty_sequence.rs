@@ -1,16 +1,28 @@
-//! This module contains an enumeration `SequenceContentError` for representing possible errors
-//! related to the validation of sequences. This includes checks for cases such as empty sequences.
+//! Sequence validation error types.
 //!
-//! The module also provides implementations of the `Debug` and `Display` traits for
-//! `SequenceContentError`, enabling error representation in different formats.
+//! Provides [`SequenceContentError`] for handling empty collection
+//! validation errors.
 
-use std::fmt::{
-    Debug,
-    Display,
-    Formatter,
+use std::{
+    error::Error,
+    fmt::{
+        Debug,
+        Display,
+        Formatter,
+    },
 };
 
-/// Represents possible errors related to sequence validation.
+/// Represents errors encountered during sequence validation.
+///
+/// # Examples
+///
+/// ```rust
+/// use catalyser::stdx::error::is_empty_sequence::SequenceContentError;
+///
+/// let err = SequenceContentError::Empty;
+/// assert_eq!(err.to_string(), "sequence is empty");
+/// ```
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum SequenceContentError {
     /// Indicates that the sequence is empty.
     Empty,
@@ -26,12 +38,10 @@ impl Debug for SequenceContentError {
 
 impl Display for SequenceContentError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                SequenceContentError::Empty => "sequence is empty".to_string(),
-            }
-        )
+        match self {
+            SequenceContentError::Empty => write!(f, "sequence is empty"),
+        }
     }
 }
+
+impl Error for SequenceContentError {}
