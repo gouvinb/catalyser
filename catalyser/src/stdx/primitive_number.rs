@@ -44,11 +44,7 @@ macro_rules! generate_bounded_num {
         #[doc = concat!("A [`", stringify!($name), "`] bounded between `MIN` and `MAX` (inclusive).")]
         #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
         #[repr(transparent)]
-        #[cfg_attr(
-            feature = "serde",
-            derive(serde::Serialize),
-            serde(transparent)
-        )]
+        #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(transparent))]
         pub struct $name<const MIN: $type_name, const MAX: $type_name>($type_name);
 
         impl<const MIN: $type_name, const MAX: $type_name> $name<MIN, MAX> {
@@ -61,9 +57,13 @@ macro_rules! generate_bounded_num {
             #[allow(unused)]
             pub fn new(num: $type_name) -> Result<Self, $crate::stdx::error::out_of_bound::OutOfBoundsError<$type_name>> {
                 if MIN > num {
-                    Err($crate::stdx::error::out_of_bound::OutOfBoundsError::Low(MIN, MAX, num))
+                    Err($crate::stdx::error::out_of_bound::OutOfBoundsError::Low(
+                        MIN, MAX, num,
+                    ))
                 } else if num > MAX {
-                    Err($crate::stdx::error::out_of_bound::OutOfBoundsError::High(MIN, MAX, num))
+                    Err($crate::stdx::error::out_of_bound::OutOfBoundsError::High(
+                        MIN, MAX, num,
+                    ))
                 } else {
                     Ok(Self(num))
                 }
@@ -146,11 +146,7 @@ macro_rules! generate_bounded_float {
         #[doc = concat!("A [`", stringify!($name), "`] bounded between `MIN` and `MAX` (inclusive).")]
         #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
         #[repr(transparent)]
-        #[cfg_attr(
-            feature = "serde",
-            derive(serde::Serialize),
-            serde(transparent)
-        )]
+        #[cfg_attr(feature = "serde", derive(serde::Serialize), serde(transparent))]
         pub struct $name($type_name);
 
         impl $name {
@@ -168,9 +164,17 @@ macro_rules! generate_bounded_float {
             #[allow(unused)]
             pub fn new(num: $type_name) -> Result<Self, $crate::stdx::error::out_of_bound::OutOfBoundsError<$type_name>> {
                 if Self::MIN > num {
-                    Err($crate::stdx::error::out_of_bound::OutOfBoundsError::Low(Self::MIN, Self::MAX, num))
+                    Err($crate::stdx::error::out_of_bound::OutOfBoundsError::Low(
+                        Self::MIN,
+                        Self::MAX,
+                        num,
+                    ))
                 } else if num > Self::MAX {
-                    Err($crate::stdx::error::out_of_bound::OutOfBoundsError::High(Self::MIN, Self::MAX, num))
+                    Err($crate::stdx::error::out_of_bound::OutOfBoundsError::High(
+                        Self::MIN,
+                        Self::MAX,
+                        num,
+                    ))
                 } else {
                     Ok(Self(num))
                 }

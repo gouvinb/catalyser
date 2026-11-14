@@ -371,10 +371,7 @@ mod tests {
                 let $collection_name: $collection_type = data_vec.clone().into_iter().collect();
 
                 let $nonempty_collection_name = unsafe { <$nonempty_collection_type>::new_unchecked($collection_name.clone()) };
-                assert_eq!(
-                    $nonempty_collection_name.into_inner(),
-                    $collection_name
-                );
+                assert_eq!($nonempty_collection_name.into_inner(), $collection_name);
             };
         }
 
@@ -416,10 +413,7 @@ mod tests {
                 let $collection_name: $collection_type = data_map.clone().into_iter().collect();
 
                 let $nonempty_collection_name = unsafe { <$nonempty_collection_type>::new_unchecked($collection_name.clone()) };
-                assert_eq!(
-                    $nonempty_collection_name.into_inner(),
-                    $collection_name
-                );
+                assert_eq!($nonempty_collection_name.into_inner(), $collection_name);
             };
         }
 
